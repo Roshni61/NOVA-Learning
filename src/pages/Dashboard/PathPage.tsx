@@ -15,6 +15,7 @@ import { useGoal } from '../../context/GoalContext';
 const ROADMAP_MODULES = [
   {
     id: 'mod_1',
+    missionId: 'python-data-structures',
     stage: 'FOUNDATIONS',
     title: 'Python & Data Structures Mastery',
     estimatedTime: '2 weeks',
@@ -26,6 +27,7 @@ const ROADMAP_MODULES = [
   },
   {
     id: 'mod_2',
+    missionId: 'linear-algebra-calculus',
     stage: 'MATHEMATICS',
     title: 'Linear Algebra & Multivariate Calculus',
     estimatedTime: '3 weeks',
@@ -37,6 +39,7 @@ const ROADMAP_MODULES = [
   },
   {
     id: 'mod_recovery_hashmap',
+    missionId: 'hashmap-hashing',
     stage: 'AI ADAPTIVE RECOVERY',
     title: 'HashMap & Collision Handling Intensive',
     estimatedTime: '3 hours',
@@ -49,6 +52,7 @@ const ROADMAP_MODULES = [
   },
   {
     id: 'mod_3',
+    missionId: 'supervised-learning',
     stage: 'MACHINE LEARNING',
     title: 'Supervised Learning & Model Evaluation',
     estimatedTime: '4 weeks',
@@ -60,6 +64,7 @@ const ROADMAP_MODULES = [
   },
   {
     id: 'mod_4',
+    missionId: 'transformers',
     stage: 'DEEP LEARNING',
     title: 'Neural Networks & Transformer Architectures',
     estimatedTime: '5 weeks',
@@ -71,6 +76,7 @@ const ROADMAP_MODULES = [
   },
   {
     id: 'mod_5',
+    missionId: 'rag',
     stage: 'AI SYSTEMS',
     title: 'Retrieval Augmented Generation (RAG) & Agents',
     estimatedTime: '4 weeks',
@@ -235,7 +241,7 @@ export const PathPage: React.FC = () => {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate('/mission/hashmap');
+                          navigate(`/mission/${mod.missionId}`);
                         }}
                         className="gap-1 font-bold text-xs shadow-md"
                       >

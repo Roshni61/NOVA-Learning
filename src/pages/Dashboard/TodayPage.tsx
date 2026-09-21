@@ -39,49 +39,13 @@ export const TodayPage: React.FC = () => {
     mastery,
     speed,
     consistency,
+    missions: contextMissions,
   } = useGoal();
 
   const [isSimulatorOpen, setIsSimulatorOpen] = useState<boolean>(false);
   const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
 
-  const [missions, setMissions] = useState<Mission[]>([
-    {
-      id: 'm1',
-      stage: 'Learn',
-      title: 'Backpropagation & Computational Graphs',
-      description: 'Master forward pass graph construction and chain rule derivative propagation.',
-      duration: '25 mins',
-      completed: false,
-      accent: 'lavender',
-    },
-    {
-      id: 'm2',
-      stage: 'Practice',
-      title: 'Matrix Calculus for Gradient Descent',
-      description: 'Interactive drill calculating Jacobian matrix shapes for linear layers.',
-      duration: '15 mins',
-      completed: false,
-      accent: 'coral',
-    },
-    {
-      id: 'm3',
-      stage: 'Apply',
-      title: 'Implement Loss Function in NumPy',
-      description: 'Write a vectorized Categorical Cross-Entropy loss module from scratch.',
-      duration: '30 mins',
-      completed: false,
-      accent: 'mint',
-    },
-    {
-      id: 'm4',
-      stage: 'Prove',
-      title: 'Benchmark Assessment (5 Questions)',
-      description: 'Verify readiness baseline for Neural Network Foundational Node.',
-      duration: '10 mins',
-      completed: false,
-      accent: 'yellow',
-    },
-  ]);
+  const [missions, setMissions] = useState<Mission[]>(contextMissions);
 
   const toggleMission = (id: string) => {
     setMissions((prev) =>
@@ -90,7 +54,7 @@ export const TodayPage: React.FC = () => {
   };
 
   const completedCount = missions.filter((m) => m.completed).length;
-  const progressPercent = Math.round((completedCount / missions.length) * 100);
+  const progressPercent = Math.round((completedCount / (missions.length || 1)) * 100);
 
   return (
     <div className="space-y-8">
@@ -214,7 +178,7 @@ export const TodayPage: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/mission/${mission.conceptId || 'hashmap'}`)}
+                              onClick={() => navigate(`/mission/${mission.id}`)}
                               className="text-xs font-bold gap-1.5 text-purple-700 hover:text-nova-coral hover:bg-purple-50 border border-purple-100/60 shadow-sm group"
                             >
                               <span>Start Mission</span>

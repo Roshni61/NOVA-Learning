@@ -100,3 +100,32 @@ export interface SkillRadarItem {
   mastery: number;
   fullMark: number;
 }
+
+export interface MissionDetail {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  title: string;
+  category: 'FOUNDATIONS' | 'MATHEMATICS' | 'MACHINE LEARNING' | 'DEEP LEARNING' | 'AI SYSTEMS' | 'ENGINEERING';
+  duration: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  stage: 'Learn' | 'Practice' | 'Apply' | 'Prove';
+  description: string;
+  learningObjective: string;
+  aiIntent: string;
+  learnContent: {
+    part1Title: string;
+    part1Text: string;
+    part2Title: string;
+    part2Text: string;
+    codeSnippet?: string;
+    diagramType: 'neuralnet' | 'backprop' | 'gradient' | 'matrix' | 'hashmap' | 'code';
+  };
+  applyContent: {
+    taskTitle: string;
+    taskDescription: string;
+    initialCode: string;
+    expectedOutput: string;
+    testCasesDescription: string;
+  };
+}
