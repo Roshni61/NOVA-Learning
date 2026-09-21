@@ -13,9 +13,13 @@ import {
   RefreshCw,
   Mic,
   ArrowRight,
+  Trash2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
+import { askGeminiTutor } from '../../lib/gemini';
 
 interface TutorMessage {
   id: string;
@@ -24,6 +28,17 @@ interface TutorMessage {
   visualType?: 'hashmap' | 'tree' | 'linkedlist' | 'stack' | 'neuralnet' | 'graph';
   timestamp: string;
 }
+
+const PROMPT_CHIPS = [
+  'Explain this simply',
+  'Give me an example',
+  'Show me a diagram',
+  'Quiz me',
+  'Give me a coding problem',
+  'Explain step by step',
+  'Explain differently',
+  'Test my understanding',
+];
 
 const TUTOR_MODES = [
   { id: 'teach', title: 'Teach Me', icon: Brain, color: 'bg-purple-100 text-purple-900 border-purple-200', prompt: 'Teach me the core concepts of HashMap collision handling step-by-step.' },
@@ -38,15 +53,19 @@ const TUTOR_MODES = [
 
 export const TutorPage: React.FC = () => {
   const location = useLocation();
-  const { concepts } = useGoal();
+  const { concepts, selectedConceptId } = useGoal();
+
+  const activeConcept = concepts.find((c) => c.id === selectedConceptId) || concepts[0];
 
   const [input, setInput] = useState<string>('');
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<TutorMessage[]>([
     {
       id: 'm0',
       sender: 'ai',
-      text: `Hello Roshni! I'm NOVA AI, your personal learning intelligence. I track your mastery across all ${concepts.length} Universe nodes. I noticed your HashMap node is currently at 48% (Knowledge Gap). What would you like to explore or solve together?`,
-      visualType: 'hashmap',
+      text: `Hello Roshni! I'm NOVA AI, your context-aware learning tutor. Active Context: ${activeConcept.name} (${activeConcept.mastery}% mastery). How can I guide your next move?`,
+      visualType: activeConcept.id === 'hashmap' ? 'hashmap' : 'neuralnet',
       timestamp: 'Just now',
     },
   ]);
@@ -57,7 +76,7 @@ export const TutorPage: React.FC = () => {
     }
   }, [location.state]);
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || input;
     if (!query.trim()) return;
 
@@ -70,43 +89,61 @@ export const TutorPage: React.FC = () => {
 
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput('');
+    setIsTyping(true);
 
-    // Simulated AI Intelligence Engine Response
-    setTimeout(() => {
-      let aiText = `I analyzed your telemetry for '${query}'. In computational graphs and machine learning architecture, parameters update according to the negative gradient direction multiplied by learning rate α.`;
-      let visual: TutorMessage['visualType'] = undefined;
+    // Call Gemini API / Intelligent AI Service
+    const aiResponseText = await askGeminiTutor(query, {
+      conceptName: activeConcept.name,
+      mastery: activeConcept.mastery,
+      weakPoints: activeConcept.weakPoints,
+    });
 
-      if (query.toLowerCase().includes('hashmap') || query.toLowerCase().includes('teach')) {
-        aiText = "Here is an interactive structural visualization of HashMap collision resolution via Chaining. Keys map to hash indexes, and colliding items form linked bucket chains:";
-        visual = 'hashmap';
-      } else if (query.toLowerCase().includes('neural') || query.toLowerCase().includes('backprop')) {
-        aiText = "Here is the Neural Network computational flow diagram showing forward activation pass and backward error propagation:";
-        visual = 'neuralnet';
-      } else if (query.toLowerCase().includes('tree')) {
-        aiText = "Here is the Binary Tree hierarchy visualization:";
-        visual = 'tree';
-      }
+    let visual: TutorMessage['visualType'] = undefined;
+    if (query.toLowerCase().includes('diagram') || query.toLowerCase().includes('hashmap') || query.toLowerCase().includes('teach')) {
+      visual = 'hashmap';
+    } else if (query.toLowerCase().includes('neural') || query.toLowerCase().includes('backprop')) {
+      visual = 'neuralnet';
+    } else if (query.toLowerCase().includes('tree')) {
+      visual = 'tree';
+    }
 
-      const aiMsg: TutorMessage = {
-        id: (Date.now() + 1).toString(),
+    const aiMsg: TutorMessage = {
+      id: (Date.now() + 1).toString(),
+      sender: 'ai',
+      text: aiResponseText,
+      visualType: visual,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, aiMsg]);
+    setIsTyping(false);
+  };
+
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleClearHistory = () => {
+    setMessages([
+      {
+        id: 'm0',
         sender: 'ai',
-        text: aiText,
-        visualType: visual,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    }, 700);
+        text: `Conversation reset. Active Context: ${activeConcept.name}. Ask me anything!`,
+        timestamp: 'Just now',
+      },
+    ]);
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-8">
+    <div className="space-y-8 max-w-5xl mx-auto pb-10">
       {/* AI TUTOR HERO BANNER */}
       <Card className="bg-gradient-to-br from-nova-charcoal via-slate-900 to-purple-950 p-8 rounded-3xl border border-slate-800 text-white text-center relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-nova-coral/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-nova-lavender/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
-          {/* Animated AI Orb */}
           <div className="relative w-20 h-20 mx-auto">
             <div className="w-full h-full rounded-3xl bg-gradient-to-tr from-nova-coral via-nova-lavender to-nova-mint p-1 shadow-2xl animate-pulse">
               <div className="w-full h-full bg-nova-charcoal rounded-[22px] flex items-center justify-center">
@@ -116,7 +153,7 @@ export const TutorPage: React.FC = () => {
           </div>
 
           <Badge variant="lavender" className="bg-white/10 text-purple-200 border-white/20">
-            NOVA AI • Continuous Learning Engine
+            NOVA AI • Context: {activeConcept.name} ({activeConcept.mastery}%)
           </Badge>
 
           <h1 className="text-3xl font-black tracking-tight text-white">
@@ -161,9 +198,18 @@ export const TutorPage: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-nova-coral" />
-            <span className="text-xs font-black text-nova-charcoal">Active AI Tutor Session</span>
+            <span className="text-xs font-black text-nova-charcoal">Conversational Learning Session</span>
           </div>
-          <Badge variant="mint">Synced with Universe</Badge>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClearHistory}
+              className="p-1.5 rounded-xl hover:bg-gray-100 text-nova-muted text-xs font-bold flex items-center gap-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+            <Badge variant="mint">Gemini 2.5 Active</Badge>
+          </div>
         </div>
 
         {/* Message Thread */}
@@ -186,9 +232,9 @@ export const TutorPage: React.FC = () => {
                     : 'bg-nova-bg border border-gray-200 text-nova-charcoal rounded-bl-none'
                 }`}
               >
-                <p className="leading-relaxed font-medium text-xs">{m.text}</p>
+                <p className="leading-relaxed font-medium text-xs whitespace-pre-wrap">{m.text}</p>
 
-                {/* AI VISUAL DIAGRAM RENDERER */}
+                {/* Visual Diagram Renderer */}
                 {m.sender === 'ai' && m.visualType === 'hashmap' && (
                   <div className="bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-[11px] text-center my-2">
                     <div className="text-purple-300 font-bold uppercase text-[10px]">
@@ -204,39 +250,41 @@ export const TutorPage: React.FC = () => {
                   </div>
                 )}
 
-                {m.sender === 'ai' && m.visualType === 'neuralnet' && (
-                  <div className="bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-[11px] text-center my-2">
-                    <div className="text-purple-300 font-bold uppercase text-[10px]">
-                      Neural Network Forward/Backward Pass
-                    </div>
-                    <div className="flex items-center justify-around gap-2 text-slate-300">
-                      <div className="p-2 bg-slate-800 rounded-lg">Input [X]</div>
-                      <span>→</span>
-                      <div className="p-2 bg-purple-950 rounded-lg border border-purple-700">Hidden Layer [W1*X + b1]</div>
-                      <span>→</span>
-                      <div className="p-2 bg-rose-950 rounded-lg border border-rose-700">Loss [L]</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Response Action Chips */}
+                {/* Message Actions */}
                 {m.sender === 'ai' && (
-                  <div className="flex items-center gap-1.5 pt-2 border-t border-gray-200/60 overflow-x-auto">
-                    {['Explain Simpler', 'Give Example', 'Show Diagram', 'Quiz Me'].map((chip) => (
-                      <button
-                        key={chip}
-                        onClick={() => handleSendMessage(`${chip} for this topic`)}
-                        className="px-2.5 py-1 rounded-lg bg-white hover:bg-purple-100 text-[10px] font-bold text-nova-charcoal border border-gray-200 transition-all flex-shrink-0"
-                      >
-                        {chip}
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200/60 text-[10px] text-nova-muted">
+                    <button
+                      onClick={() => handleCopy(m.id, m.text)}
+                      className="flex items-center gap-1 font-bold hover:text-nova-charcoal"
+                    >
+                      {copiedId === m.id ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      {copiedId === m.id ? 'Copied' : 'Copy'}
+                    </button>
+                    <span>{m.timestamp}</span>
                   </div>
                 )}
-
-                <span className="text-[9px] text-nova-muted block text-right">{m.timestamp}</span>
               </div>
             </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex items-center gap-2 text-xs text-purple-700 font-bold bg-purple-50 p-3 rounded-2xl w-fit">
+              <Bot className="w-4 h-4 text-nova-coral animate-bounce" />
+              <span>NOVA AI is formulating response...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Suggested Prompt Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {PROMPT_CHIPS.map((chip) => (
+            <button
+              key={chip}
+              onClick={() => handleSendMessage(chip)}
+              className="px-3 py-1.5 rounded-xl bg-nova-bg hover:bg-purple-100 text-xs font-semibold text-nova-charcoal border border-gray-200 whitespace-nowrap transition-all"
+            >
+              {chip}
+            </button>
           ))}
         </div>
 
@@ -247,7 +295,7 @@ export const TutorPage: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Ask NOVA AI anything about your concepts or code..."
+            placeholder="Ask NOVA AI anything about your concepts, code, or mistakes..."
             className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-nova-lavender"
           />
           <Button variant="coral" size="md" onClick={() => handleSendMessage()} className="rounded-2xl px-5 py-3">

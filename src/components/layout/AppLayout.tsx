@@ -94,7 +94,10 @@ export const AppLayout: React.FC = () => {
           </div>
 
           {/* Profile Level & Avatar */}
-          <div className="flex items-center gap-2.5 bg-nova-bg px-3 py-1.5 rounded-2xl border border-gray-200">
+          <Link
+            to="/profile"
+            className="flex items-center gap-2.5 bg-nova-bg hover:bg-purple-50 px-3 py-1.5 rounded-2xl border border-gray-200 cursor-pointer transition-all hover:scale-105"
+          >
             <div className="flex items-center gap-1 text-xs font-bold text-nova-charcoal">
               <Flame className="w-4 h-4 text-nova-coral fill-nova-coral" />
               <span>Level 4</span>
@@ -106,7 +109,7 @@ export const AppLayout: React.FC = () => {
               alt={mockUser.name}
               className="w-7 h-7 rounded-full object-cover border border-gray-300"
             />
-          </div>
+          </Link>
         </div>
       </header>
 
