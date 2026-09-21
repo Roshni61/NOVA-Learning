@@ -8,11 +8,13 @@ import {
   Clock,
   BookOpen,
   Code,
-  Award,
   Play,
   Zap,
   CheckCircle2,
   XCircle,
+  HelpCircle,
+  ShieldCheck,
+  Target,
 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
@@ -27,33 +29,43 @@ export const MissionWorkspacePage: React.FC = () => {
   // Dynamically resolve mission data based on route identifier (NO hardcoded HashMap fallback!)
   const missionData = getMissionDetail(conceptId);
 
-  const [activeStage, setActiveStage] = useState<'Learn' | 'Practice' | 'Apply' | 'Prove'>(missionData.stage || 'Learn');
+  const [activeStage, setActiveStage] = useState<'Learn' | 'Practice' | 'Apply' | 'Prove'>('Learn');
   const [learnStep, setLearnStep] = useState<number>(0);
 
-  // 10 API-generated questions state
+  // Practice Stage State
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState<boolean>(true);
   const [currentQIndex, setCurrentQIndex] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState<boolean>(false);
   const [userScore, setUserScore] = useState<number>(0);
+  const [showHint, setShowHint] = useState<boolean>(false);
 
-  // Apply stage code workspace
+  // Apply Stage State
   const [userCode, setUserCode] = useState<string>(missionData.applyContent.initialCode);
   const [testOutput, setTestOutput] = useState<string | null>(null);
   const [isTestPassed, setIsTestPassed] = useState<boolean | null>(null);
 
-  // Synchronize when route conceptId changes
+  // Stage Completion Locks
+  const [isPracticeUnlocked, setIsPracticeUnlocked] = useState<boolean>(false);
+  const [isApplyUnlocked, setIsApplyUnlocked] = useState<boolean>(false);
+  const [isProveUnlocked, setIsProveUnlocked] = useState<boolean>(false);
+
+  // Synchronize state when route conceptId changes
   useEffect(() => {
     setUserCode(missionData.applyContent.initialCode);
     setTestOutput(null);
     setIsTestPassed(null);
-    setActiveStage(missionData.stage || 'Learn');
+    setActiveStage('Learn');
     setLearnStep(0);
     setCurrentQIndex(0);
     setSelectedOption(null);
     setIsAnswerSubmitted(false);
     setUserScore(0);
+    setShowHint(false);
+    setIsPracticeUnlocked(false);
+    setIsApplyUnlocked(false);
+    setIsProveUnlocked(false);
   }, [conceptId, missionData.id]);
 
   // Load 10 API questions dynamically for the current mission title
@@ -81,13 +93,11 @@ export const MissionWorkspacePage: React.FC = () => {
       setCurrentQIndex(currentQIndex + 1);
       setSelectedOption(null);
       setIsAnswerSubmitted(false);
+      setShowHint(false);
     } else {
-      // Completed all 10 questions
-      const finalScorePct = Math.round(
-        ((userScore + (selectedOption === currentQ?.correctAnswer ? 1 : 0)) / (questions.length || 10)) * 100
-      );
-      completeMission(missionData.id, finalScorePct);
-      setActiveStage('Prove');
+      // Completed all 10 questions -> Unlock Apply Stage (75%)
+      setIsApplyUnlocked(true);
+      setActiveStage('Apply');
     }
   };
 
@@ -101,6 +111,14 @@ export const MissionWorkspacePage: React.FC = () => {
   const handleRunCode = () => {
     setTestOutput(missionData.applyContent.expectedOutput);
     setIsTestPassed(true);
+    setIsProveUnlocked(true);
+  };
+
+  const handleFinalizeProve = () => {
+    const finalScorePct = Math.round(
+      ((userScore + (selectedOption === currentQ?.correctAnswer ? 1 : 0)) / (questions.length || 10)) * 100
+    );
+    completeMission(missionData.id, finalScorePct);
   };
 
   return (
@@ -128,29 +146,40 @@ export const MissionWorkspacePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 4-Stage Navigation Pills */}
+          {/* 4-Stage Navigation Pills with Stage Progress & Gating */}
           <div className="flex items-center gap-1.5 bg-nova-bg p-1.5 rounded-2xl border border-gray-200">
-            {(['Learn', 'Practice', 'Apply', 'Prove'] as const).map((stage) => (
+            {[
+              { id: 'Learn', pct: '25%', unlocked: true },
+              { id: 'Practice', pct: '50%', unlocked: isPracticeUnlocked || activeStage === 'Practice' || isApplyUnlocked || isProveUnlocked },
+              { id: 'Apply', pct: '75%', unlocked: isApplyUnlocked || activeStage === 'Apply' || isProveUnlocked },
+              { id: 'Prove', pct: '100%', unlocked: isProveUnlocked || activeStage === 'Prove' },
+            ].map((stageItem) => (
               <button
-                key={stage}
-                onClick={() => setActiveStage(stage)}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                  activeStage === stage
+                key={stageItem.id}
+                onClick={() => stageItem.unlocked && setActiveStage(stageItem.id as any)}
+                disabled={!stageItem.unlocked}
+                className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                  activeStage === stageItem.id
                     ? 'bg-nova-charcoal text-white shadow-md'
-                    : 'text-nova-muted hover:text-nova-charcoal hover:bg-white/60'
+                    : stageItem.unlocked
+                    ? 'text-nova-muted hover:text-nova-charcoal hover:bg-white/60'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
                 }`}
               >
-                {stage}
+                <span>{stageItem.id}</span>
+                <span className="text-[10px] opacity-75 font-mono">({stageItem.pct})</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Dynamic Progress Bar representing Stage Completion */}
         <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-nova-coral via-nova-lavender to-nova-mint h-full rounded-full transition-all duration-500"
-            style={{ width: `${calculateProgress()}%` }}
+          <motion.div
+            initial={{ width: '25%' }}
+            animate={{ width: `${calculateProgress()}%` }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="bg-gradient-to-r from-nova-coral via-nova-lavender to-nova-mint h-full rounded-full"
           />
         </div>
 
@@ -168,33 +197,50 @@ export const MissionWorkspacePage: React.FC = () => {
         </div>
       </div>
 
-      {/* STAGE 1: LEARN */}
+      {/* STAGE 1: LEARN (Purpose: Understand the concept - 25% Progress) */}
       {activeStage === 'Learn' && (
         <Card className="bg-white p-8 border border-gray-100 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <Badge variant="lavender" className="gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" /> Stage 1: Educational Intuition
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="lavender" className="gap-1.5">
+                <BookOpen className="w-3.5 h-3.5" /> Stage 1: Learn (25% Progress)
+              </Badge>
+              <span className="text-xs font-semibold text-nova-muted">Purpose: Understand the Concept</span>
+            </div>
             <span className="text-xs font-bold text-nova-muted">Part {learnStep + 1} of 2</span>
           </div>
 
           {learnStep === 0 ? (
-            <div className="space-y-4">
-              <h2 className="text-xl font-black text-nova-charcoal">
-                {missionData.learnContent.part1Title}
-              </h2>
-              <p className="text-sm text-nova-muted leading-relaxed">
-                {missionData.learnContent.part1Text}
-              </p>
+            <div className="space-y-6">
+              {/* Explanation & Intuition Header */}
+              <div className="space-y-2">
+                <h2 className="text-xl font-black text-nova-charcoal">
+                  {missionData.learnContent.part1Title}
+                </h2>
+                <p className="text-sm text-nova-muted leading-relaxed">
+                  {missionData.learnContent.part1Text}
+                </p>
+              </div>
 
-              {/* Dynamic Interactive Visual Diagrams based on diagramType */}
+              {/* Intuition Callout Card */}
+              <div className="bg-purple-50/80 p-4 rounded-2xl border border-purple-100 space-y-1.5 text-xs text-purple-950">
+                <span className="font-extrabold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  Intuition & Core Principle
+                </span>
+                <p className="leading-relaxed">
+                  {missionData.learningObjective}
+                </p>
+              </div>
+
+              {/* Interactive Visual Explanation */}
               <div className="bg-slate-900 text-slate-100 p-6 rounded-3xl border border-slate-800 space-y-6 shadow-2xl relative overflow-hidden">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="text-xs font-mono font-bold text-purple-300 uppercase flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-nova-coral" />
-                    Interactive AI Visualizer: {missionData.conceptName}
+                    Visual Explanation: {missionData.conceptName}
                   </div>
-                  <div className="text-[11px] font-mono text-slate-400">Educational Diagram Engine</div>
+                  <div className="text-[11px] font-mono text-slate-400">Interactive Diagram Engine</div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -323,11 +369,23 @@ export const MissionWorkspacePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Objective Summary Card */}
+                  {/* Key Ideas Checklist */}
                   <div className="space-y-3 text-xs text-slate-300 font-mono">
-                    <div className="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-1">
-                      <span className="font-bold text-purple-300 block uppercase">Learning Objective</span>
-                      <p className="text-[11px] leading-relaxed text-slate-300">{missionData.learningObjective}</p>
+                    <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+                      <span className="font-bold text-purple-300 block uppercase flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-nova-mint" /> Key Concept Takeaways
+                      </span>
+                      <ul className="space-y-1.5 text-[11px] text-slate-300">
+                        <li className="flex items-center gap-1.5">
+                          <span className="text-nova-coral">•</span> {missionData.title} formulation
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <span className="text-nova-lavender">•</span> Structural derivative calculation
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <span className="text-nova-mint">•</span> Numerical precision stability
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -335,31 +393,45 @@ export const MissionWorkspacePage: React.FC = () => {
 
               <div className="flex justify-end pt-4">
                 <Button variant="coral" size="md" onClick={() => setLearnStep(1)}>
-                  Next: Formulation & Code <ArrowRight className="w-4 h-4 ml-1" />
+                  Next: Formulation & Code Example <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <h2 className="text-xl font-black text-nova-charcoal">
-                {missionData.learnContent.part2Title}
-              </h2>
-              <p className="text-sm text-nova-muted leading-relaxed">
-                {missionData.learnContent.part2Text}
-              </p>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-xl font-black text-nova-charcoal">
+                  {missionData.learnContent.part2Title}
+                </h2>
+                <p className="text-sm text-nova-muted leading-relaxed">
+                  {missionData.learnContent.part2Text}
+                </p>
+              </div>
 
               {missionData.learnContent.codeSnippet && (
-                <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-purple-300 space-y-1 overflow-x-auto">
-                  <pre>{missionData.learnContent.codeSnippet}</pre>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
+                    Code Example:
+                  </span>
+                  <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-purple-300 space-y-1 overflow-x-auto">
+                    <pre>{missionData.learnContent.codeSnippet}</pre>
+                  </div>
                 </div>
               )}
 
-              <div className="flex justify-between pt-4">
+              <div className="flex justify-between pt-4 border-t border-gray-100">
                 <Button variant="ghost" size="md" onClick={() => setLearnStep(0)}>
                   Back
                 </Button>
-                <Button variant="coral" size="md" onClick={() => setActiveStage('Practice')}>
-                  Advance to 10-Question Practice <ArrowRight className="w-4 h-4 ml-1" />
+                <Button
+                  variant="coral"
+                  size="md"
+                  onClick={() => {
+                    setIsPracticeUnlocked(true);
+                    setActiveStage('Practice');
+                  }}
+                >
+                  Complete Learn & Unlock Practice (50%) <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
@@ -367,13 +439,16 @@ export const MissionWorkspacePage: React.FC = () => {
         </Card>
       )}
 
-      {/* STAGE 2: PRACTICE (10 API-GENERATED QUESTIONS) */}
+      {/* STAGE 2: PRACTICE (Purpose: Build Skill with Guided Drills & Hints - 50% Progress) */}
       {activeStage === 'Practice' && (
         <Card className="bg-white p-8 border border-gray-100 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <Badge variant="coral" className="gap-1.5">
-              <Zap className="w-3.5 h-3.5" /> Stage 2: AI 10-Question Drill
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="coral" className="gap-1.5">
+                <Zap className="w-3.5 h-3.5" /> Stage 2: Practice (50% Progress)
+              </Badge>
+              <span className="text-xs font-semibold text-nova-muted">Purpose: Build Skill with Guided AI Drills</span>
+            </div>
             <span className="text-xs font-bold text-nova-charcoal">
               Question {currentQIndex + 1} of {questions.length || 10}
             </span>
@@ -383,13 +458,13 @@ export const MissionWorkspacePage: React.FC = () => {
             <div className="text-center py-12 space-y-3">
               <Sparkles className="w-8 h-8 text-nova-coral animate-spin mx-auto" />
               <div className="text-sm font-bold text-nova-charcoal">
-                Generating 10 AI Questions for "{missionData.title}"...
+                Formulating 10 Guided AI Drill Questions for "{missionData.title}"...
               </div>
-              <p className="text-xs text-nova-muted">Formulating diverse MCQ, scenario, and debugging questions via Gemini API.</p>
+              <p className="text-xs text-nova-muted">Generating adaptive MCQ, scenario, and debugging questions via Gemini API.</p>
             </div>
           ) : currentQ ? (
             <div className="space-y-6">
-              {/* Question Header */}
+              {/* Question Header & Type */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="lavender" className="uppercase text-[10px]">
@@ -404,6 +479,23 @@ export const MissionWorkspacePage: React.FC = () => {
                 </h3>
               </div>
 
+              {/* Guided Hint Button & Box */}
+              <div>
+                {!showHint ? (
+                  <button
+                    onClick={() => setShowHint(true)}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 hover:text-nova-coral bg-purple-50 px-3 py-1.5 rounded-xl border border-purple-100 transition-all"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" /> Reveal Hint
+                  </button>
+                ) : (
+                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-950 font-medium">
+                    <span className="font-bold block text-amber-900 mb-0.5">💡 Guided Hint:</span>
+                    Pay attention to local gradient derivatives and tensor shape alignment.
+                  </motion.div>
+                )}
+              </div>
+
               {/* Options list */}
               <div className="space-y-3">
                 {currentQ.options.map((optionText, optIdx) => {
@@ -412,7 +504,7 @@ export const MissionWorkspacePage: React.FC = () => {
 
                   if (isAnswerSubmitted) {
                     if (optIdx === currentQ.correctAnswer) {
-                      optStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-bold';
+                      optStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-bold shadow-sm';
                     } else if (isSelected) {
                       optStyle = 'border-rose-500 bg-rose-50 text-rose-950';
                     }
@@ -438,7 +530,7 @@ export const MissionWorkspacePage: React.FC = () => {
                 })}
               </div>
 
-              {/* Explanation Box after submission */}
+              {/* Immediate Feedback Box after submission */}
               {isAnswerSubmitted && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -450,7 +542,7 @@ export const MissionWorkspacePage: React.FC = () => {
                   }`}
                 >
                   <div className="font-bold flex items-center gap-1.5">
-                    {selectedOption === currentQ.correctAnswer ? '✓ Correct!' : '✗ Explanation:'}
+                    {selectedOption === currentQ.correctAnswer ? '✓ Correct Answer!' : '✗ Explanation:'}
                   </div>
                   <p>{currentQ.explanation}</p>
                 </motion.div>
@@ -465,11 +557,11 @@ export const MissionWorkspacePage: React.FC = () => {
                     disabled={selectedOption === null}
                     onClick={handleSubmitAnswer}
                   >
-                    Submit Answer
+                    Submit Answer & Check Feedback
                   </Button>
                 ) : (
                   <Button variant="coral" size="md" onClick={handleNextQuestion}>
-                    {currentQIndex < questions.length - 1 ? 'Next Question' : 'Complete 10-Question Drill'}{' '}
+                    {currentQIndex < questions.length - 1 ? 'Next Practice Question' : 'Complete Practice & Unlock Apply (75%)'}{' '}
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 )}
@@ -479,17 +571,30 @@ export const MissionWorkspacePage: React.FC = () => {
         </Card>
       )}
 
-      {/* STAGE 3: APPLY */}
+      {/* STAGE 3: APPLY (Purpose: Use Concept in Realistic Problem - 75% Progress) */}
       {activeStage === 'Apply' && (
         <Card className="bg-white p-8 border border-gray-100 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <Badge variant="mint" className="gap-1.5">
-              <Code className="w-3.5 h-3.5" /> Stage 3: Live Code Implementation
-            </Badge>
-            <span className="text-xs font-bold text-emerald-700">NumPy & Python Execution Engine</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="mint" className="gap-1.5">
+                <Code className="w-3.5 h-3.5" /> Stage 3: Apply (75% Progress)
+              </Badge>
+              <span className="text-xs font-semibold text-nova-muted">Purpose: Solve Realistic Engineering Problem</span>
+            </div>
+            <span className="text-xs font-bold text-emerald-700">NumPy Execution Engine</span>
           </div>
 
           <div className="space-y-4">
+            {/* Real-world Scenario Context Card */}
+            <div className="p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-2xl border border-emerald-100 space-y-1">
+              <span className="text-xs font-black text-emerald-900 uppercase tracking-wider block flex items-center gap-1.5">
+                <Target className="w-4 h-4 text-emerald-600" /> Real-World Problem Scenario
+              </span>
+              <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                You are engineering a production machine learning pipeline. Implement the module below to pass all vectorized unit test cases.
+              </p>
+            </div>
+
             <div className="space-y-1">
               <h3 className="text-lg font-black text-nova-charcoal">
                 {missionData.applyContent.taskTitle}
@@ -507,19 +612,19 @@ export const MissionWorkspacePage: React.FC = () => {
             />
 
             {testOutput && (
-              <div className="p-4 bg-black text-emerald-400 font-mono text-xs rounded-2xl border border-emerald-900/60 leading-relaxed whitespace-pre-line">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-black text-emerald-400 font-mono text-xs rounded-2xl border border-emerald-900/60 leading-relaxed whitespace-pre-line">
                 {testOutput}
-              </div>
+              </motion.div>
             )}
 
             <div className="flex justify-between items-center pt-2">
               <Button variant="secondary" size="md" onClick={handleRunCode}>
-                <Play className="w-4 h-4 mr-1 text-emerald-600" /> Execute Unit Test Cases
+                <Play className="w-4 h-4 mr-1 text-emerald-600" /> Execute Unit Test Runner
               </Button>
 
               {isTestPassed && (
-                <Button variant="coral" size="md" onClick={() => setActiveStage('Prove')}>
-                  Proceed to Final Assessment <ArrowRight className="w-4 h-4 ml-1" />
+                <Button variant="coral" size="md" onClick={() => { setIsProveUnlocked(true); setActiveStage('Prove'); }}>
+                  Pass All Tests & Unlock Prove (100%) <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               )}
             </div>
@@ -527,29 +632,52 @@ export const MissionWorkspacePage: React.FC = () => {
         </Card>
       )}
 
-      {/* STAGE 4: PROVE */}
+      {/* STAGE 4: PROVE (Purpose: Independent Mastery Assessment - 100% Progress) */}
       {activeStage === 'Prove' && (
         <Card className="bg-white p-8 border border-gray-100 space-y-6 text-center">
           <div className="w-16 h-16 rounded-3xl bg-nova-mint/20 text-emerald-800 flex items-center justify-center font-black mx-auto shadow-sm">
-            <Award className="w-8 h-8 text-emerald-600" />
+            <ShieldCheck className="w-8 h-8 text-emerald-600" />
           </div>
 
           <div className="space-y-2">
-            <Badge variant="mint">MISSION COMPLETED ✓</Badge>
+            <Badge variant="mint">STAGE 4: INDEPENDENT MASTERY PROVEN (100% PROGRESS)</Badge>
             <h2 className="text-3xl font-black text-nova-charcoal">
-              Mastery Upgraded: {missionData.title}
+              Independent Mastery Verified: {missionData.title}
             </h2>
-            <p className="text-xs text-nova-muted max-w-md mx-auto">
-              You answered 10 AI questions for <strong className="text-nova-charcoal">{missionData.title}</strong> with an accuracy score of <strong className="text-nova-coral">{Math.round((userScore / (questions.length || 10)) * 100)}%</strong>. Your Learning Twin telemetry, Universe nodes, and Path were updated!
+            <p className="text-xs text-nova-muted max-w-md mx-auto leading-relaxed">
+              You independently completed all 4 stages (Learn → Practice → Apply → Prove) for <strong className="text-nova-charcoal">{missionData.title}</strong> with a Practice Score of <strong className="text-nova-coral">{Math.round((userScore / (questions.length || 10)) * 100)}%</strong> and 100% Unit Test Pass accuracy.
             </p>
           </div>
 
+          {/* Telemetry Mastery Badge & XP Reward */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto text-left">
+            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
+              <div className="text-[10px] font-bold text-nova-muted uppercase">Concept Status</div>
+              <div className="text-sm font-extrabold text-emerald-600 mt-1">Mastered ✓</div>
+            </div>
+            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
+              <div className="text-[10px] font-bold text-nova-muted uppercase">XP Earned</div>
+              <div className="text-sm font-extrabold text-nova-yellow mt-1">+250 XP</div>
+            </div>
+            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
+              <div className="text-[10px] font-bold text-nova-muted uppercase">Learning Twin</div>
+              <div className="text-sm font-extrabold text-purple-700 mt-1">Telemetry Synced</div>
+            </div>
+          </div>
+
           <div className="flex justify-center gap-4 pt-4">
-            <Button variant="coral" size="lg" onClick={() => navigate('/today')}>
-              Return to Today Feed
+            <Button
+              variant="coral"
+              size="lg"
+              onClick={() => {
+                handleFinalizeProve();
+                navigate('/today');
+              }}
+            >
+              Update Learning Twin & Return to Today
             </Button>
             <Button variant="secondary" size="lg" onClick={() => navigate('/universe')}>
-              View Knowledge Universe
+              View Knowledge Universe Graph
             </Button>
           </div>
         </Card>
