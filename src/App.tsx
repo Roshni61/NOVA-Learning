@@ -4,7 +4,7 @@ import { GoalProvider } from './context/GoalContext';
 import { HomePage } from './pages/Home';
 import { LoginPage, OnboardingPage } from './pages/Auth';
 import { AppLayout } from './components/layout';
-import { TodayPage, UniversePage, PathPage, TutorPage, ProfilePage } from './pages/Dashboard';
+import { TodayPage, UniversePage, PathPage, TutorPage, ProfilePage, MissionWorkspacePage } from './pages/Dashboard';
 
 export const App: React.FC = () => {
   return (
@@ -23,6 +23,7 @@ export const App: React.FC = () => {
             <Route path="/path" element={<PathPage />} />
             <Route path="/tutor" element={<TutorPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/mission/:conceptId" element={<MissionWorkspacePage />} />
           </Route>
 
           {/* Fallback Catch-all */}

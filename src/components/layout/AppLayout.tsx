@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -13,6 +13,7 @@ import {
 import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';
 import { mockUser } from '../../mock/data';
+import { GlobalSearchModal } from './GlobalSearchModal';
 
 const NAV_ITEMS = [
   { path: '/today', label: 'Today', icon: Sparkles },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
 export const AppLayout: React.FC = () => {
   const location = useLocation();
   const { targetGoal, streak } = useGoal();
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-nova-bg text-nova-charcoal flex flex-col font-sans selection:bg-nova-lavender pb-20 md:pb-0">
@@ -75,13 +77,20 @@ export const AppLayout: React.FC = () => {
         {/* Right: Search & Profile Avatar */}
         <div className="flex items-center gap-3">
           {/* Quick Search */}
-          <div className="relative hidden lg:block w-64">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+          <div
+            onClick={() => setIsSearchOpen(true)}
+            className="relative hidden lg:flex items-center w-64 cursor-pointer"
+          >
+            <Search className="w-4 h-4 text-gray-400 absolute left-3" />
             <input
               type="text"
+              readOnly
               placeholder="Search concepts, nodes, or ask AI..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-gray-200 bg-nova-bg text-xs focus:outline-none focus:ring-2 focus:ring-nova-lavender font-medium"
+              className="w-full pl-9 pr-12 py-1.5 rounded-xl border border-gray-200 bg-nova-bg text-xs cursor-pointer focus:outline-none font-medium"
             />
+            <span className="text-[9px] font-black text-nova-muted bg-white border border-gray-200 px-1.5 py-0.5 rounded absolute right-2">
+              ⌘K
+            </span>
           </div>
 
           {/* Profile Level & Avatar */}
@@ -136,6 +145,11 @@ export const AppLayout: React.FC = () => {
           );
         })}
       </div>
+      {/* Global AI Command Modal */}
+      <GlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </div>
   );
 };

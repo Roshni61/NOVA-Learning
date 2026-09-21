@@ -3,3 +3,4 @@ export { UniversePage } from './UniversePage';
 export { PathPage } from './PathPage';
 export { TutorPage } from './TutorPage';
 export { ProfilePage } from './ProfilePage';
+export { MissionWorkspacePage } from './MissionWorkspacePage';
