@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
@@ -18,6 +19,7 @@ import { TutorDrawer } from '../../components/tutor/TutorDrawer';
 
 interface Mission {
   id: string;
+  conceptId?: string;
   stage: 'Learn' | 'Practice' | 'Apply' | 'Prove';
   title: string;
   description: string;
@@ -27,6 +29,7 @@ interface Mission {
 }
 
 export const TodayPage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     targetGoal,
     readiness,
@@ -204,7 +207,12 @@ export const TodayPage: React.FC = () => {
                         {mission.completed ? (
                           <span className="text-xs font-bold text-emerald-600">Completed</span>
                         ) : (
-                          <Button variant="ghost" size="sm" className="text-xs font-bold gap-1 text-purple-700">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/mission/${mission.conceptId || 'hashmap'}`)}
+                            className="text-xs font-bold gap-1 text-purple-700 hover:text-nova-coral"
+                          >
                             Start Mission <ArrowRight className="w-3.5 h-3.5" />
                           </Button>
                         )}
