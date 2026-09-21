@@ -69,7 +69,9 @@ export const OnboardingPage: React.FC = () => {
   };
 
   const handleFinishOnboarding = () => {
-    navigate('/today');
+    setTimeline(months, hours);
+    setGoal(selectedGoal);
+    navigate('/login', { state: { fromOnboarding: true, goal: selectedGoal } });
   };
 
   return (

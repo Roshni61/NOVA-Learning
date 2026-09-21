@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Lock, Mail, Flame, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock, Mail, Flame, CheckCircle2, User } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
+import { useGoal } from '../../context/GoalContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { targetGoal } = useGoal();
+
+  const isFromOnboarding = (location.state as any)?.fromOnboarding;
+  const [isSignUp, setIsSignUp] = useState<boolean>(Boolean(isFromOnboarding));
   const [email, setEmail] = useState('alex.rivera@nova.edu');
   const [password, setPassword] = useState('••••••••••••');
+  const [name, setName] = useState('Alex Rivera');
+  const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
+  const [resetSent, setResetSent] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect to dashboard feed
+    // Navigate to Dashboard
     navigate('/today');
   };
 
   return (
     <div className="min-h-screen bg-nova-bg flex items-center justify-center p-4 md:p-8 font-sans selection:bg-nova-lavender">
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        {/* Left Side: Login Form Card */}
+        {/* Left Side: Login / Sign Up Form */}
         <motion.div
           className="lg:col-span-6"
           initial={{ opacity: 0, x: -20 }}
@@ -33,14 +42,46 @@ export const LoginPage: React.FC = () => {
                 </div>
                 <span className="text-xl font-black text-nova-charcoal tracking-tight">NOVA</span>
               </Link>
-              <Badge variant="lavender">Welcome Back</Badge>
+              <Badge variant="lavender">{isSignUp ? 'Create Account' : 'Welcome Back'}</Badge>
             </div>
 
+            {/* Banner if coming from Onboarding */}
+            {isFromOnboarding && (
+              <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs text-purple-900 font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>Goal set to <strong>{targetGoal}</strong>! Create your account to save your learning path.</span>
+              </div>
+            )}
+
             <div className="space-y-1">
-              <h1 className="text-2xl font-black text-nova-charcoal">Sign in to NOVA</h1>
+              <h1 className="text-2xl font-black text-nova-charcoal">
+                {isSignUp ? 'Create Your NOVA Account' : 'Sign in to NOVA'}
+              </h1>
               <p className="text-sm text-nova-muted">
-                Continue your AI-powered continuous learning journey.
+                {isSignUp ? 'Unlock continuous AI learning intelligence & dynamic maps.' : 'Continue your AI-powered learning journey.'}
               </p>
+            </div>
+
+            {/* Auth Toggle Tabs */}
+            <div className="grid grid-cols-2 p-1 bg-nova-bg rounded-2xl border border-gray-200">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(false)}
+                className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                  !isSignUp ? 'bg-white text-nova-charcoal shadow-sm' : 'text-nova-muted hover:text-nova-charcoal'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(true)}
+                className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                  isSignUp ? 'bg-white text-nova-charcoal shadow-sm' : 'text-nova-muted hover:text-nova-charcoal'
+                }`}
+              >
+                Create Account
+              </button>
             </div>
 
             {/* Social Login */}
@@ -70,7 +111,7 @@ export const LoginPage: React.FC = () => {
               Continue with Google
             </button>
 
-            <div className="relative flex items-center justify-center my-4">
+            <div className="relative flex items-center justify-center my-2">
               <div className="border-t border-gray-200 w-full" />
               <span className="bg-white px-3 text-xs text-nova-muted uppercase tracking-wider font-semibold absolute">
                 or email
@@ -79,9 +120,28 @@ export const LoginPage: React.FC = () => {
 
             {/* Email Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div className="space-y-1 text-left">
+                  <label className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nova-lavender text-sm font-medium"
+                      placeholder="Alex Rivera"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1 text-left">
                 <label className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
-                  Work or Student Email
+                  Email Address
                 </label>
                 <div className="relative">
                   <Mail className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
@@ -90,16 +150,27 @@ export const LoginPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nova-lavender focus:border-transparent text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nova-lavender text-sm font-medium"
                     placeholder="you@example.com"
                   />
                 </div>
               </div>
 
               <div className="space-y-1 text-left">
-                <label className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
+                    Password
+                  </label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(true)}
+                      className="text-xs font-bold text-nova-coral hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <Lock className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
                   <input
@@ -107,26 +178,27 @@ export const LoginPage: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nova-lavender focus:border-transparent text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nova-lavender text-sm font-medium"
                   />
                 </div>
               </div>
 
               <Button variant="coral" size="lg" className="w-full justify-center">
-                Sign In to Dashboard <ArrowRight className="w-4 h-4 ml-1" />
+                {isSignUp ? 'Create Account & Continue' : 'Sign In to Dashboard'} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </form>
 
-            <div className="text-center pt-2 text-xs text-nova-muted">
-              Don't have an active goal set up?{' '}
-              <Link to="/onboarding" className="font-bold text-nova-coral hover:underline">
-                Start Goal Onboarding
-              </Link>
+            <div className="text-center text-xs text-nova-muted">
+              {isSignUp ? (
+                <span>Already have an account? <button onClick={() => setIsSignUp(false)} className="font-bold text-nova-coral hover:underline">Sign In</button></span>
+              ) : (
+                <span>Need to setup a goal first? <Link to="/onboarding" className="font-bold text-nova-coral hover:underline">Goal Setup</Link></span>
+              )}
             </div>
           </Card>
         </motion.div>
 
-        {/* Right Side: Ambient Gradient Card with Live Learning Twin Preview */}
+        {/* Right Side: Live Learning Twin Preview */}
         <motion.div
           className="lg:col-span-6 hidden lg:block"
           initial={{ opacity: 0, x: 20 }}
@@ -134,7 +206,6 @@ export const LoginPage: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="relative p-8 md:p-10 rounded-3xl bg-gradient-to-br from-nova-charcoal via-slate-900 to-purple-950 text-white shadow-2xl overflow-hidden border border-slate-800">
-            {/* Ambient Background glow */}
             <div className="absolute -top-10 -right-10 w-64 h-64 bg-nova-coral/20 rounded-full blur-3xl" />
             <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-nova-lavender/20 rounded-full blur-3xl" />
 
@@ -143,25 +214,24 @@ export const LoginPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-nova-coral" />
                   <span className="text-xs font-bold uppercase tracking-wider text-purple-200">
-                    Live Preview
+                    Live Telemetry Preview
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs font-medium px-3 py-1 rounded-full border border-emerald-500/30">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  Syncing Real-time Twin
+                  Active Learner Twin
                 </div>
               </div>
 
               <div className="space-y-2">
                 <h2 className="text-2xl font-black leading-tight text-white">
-                  Continuous Learning Intelligence
+                  Continuous AI Learning OS
                 </h2>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Your twin maps every concept node, tracks knowledge decay, and recalculates daily priorities.
                 </p>
               </div>
 
-              {/* Learning Twin Card inside Right Pane */}
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -169,22 +239,21 @@ export const LoginPage: React.FC = () => {
                       LT
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">Alex's Learning Twin</h4>
-                      <p className="text-[11px] text-purple-200">Goal: AI/ML Engineer</p>
+                      <h4 className="text-sm font-bold text-white">{name}'s Learning Twin</h4>
+                      <p className="text-[11px] text-purple-200">Goal: {targetGoal}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-xs font-bold text-nova-yellow flex items-center gap-1 justify-end">
                       <Flame className="w-4 h-4 fill-nova-yellow" /> 12-Day Streak
                     </div>
-                    <div className="text-[10px] text-slate-400">94% Retention</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 pt-2 text-center">
                   <div className="bg-black/30 p-2.5 rounded-xl border border-white/5">
                     <div className="text-[10px] text-slate-400">Mastery</div>
-                    <div className="text-base font-extrabold text-nova-mint">78%</div>
+                    <div className="text-base font-extrabold text-nova-mint">72%</div>
                   </div>
                   <div className="bg-black/30 p-2.5 rounded-xl border border-white/5">
                     <div className="text-[10px] text-slate-400">Speed</div>
@@ -195,19 +264,37 @@ export const LoginPage: React.FC = () => {
                     <div className="text-base font-extrabold text-nova-coral">68%</div>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between text-xs text-purple-200 pt-1 border-t border-white/10">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-nova-mint" />
-                    Today's 3 Missions Queued
-                  </span>
-                  <span className="font-semibold">Target: Dec 2026</span>
-                </div>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <Card className="bg-white p-6 max-w-md w-full rounded-3xl space-y-4">
+            <h3 className="text-lg font-black text-nova-charcoal">Reset Your Password</h3>
+            <p className="text-xs text-nova-muted">Enter your email address to receive a secure reset link.</p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium"
+            />
+            {resetSent ? (
+              <div className="p-3 bg-emerald-50 text-emerald-900 rounded-xl text-xs font-bold text-center">
+                Password reset link sent to {email}!
+              </div>
+            ) : (
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowForgotModal(false)}>Cancel</Button>
+                <Button variant="coral" size="sm" onClick={() => setResetSent(true)}>Send Reset Link</Button>
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
