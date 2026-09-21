@@ -13,6 +13,7 @@ import {
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
 import { WhatIfSimulatorModal } from '../../components/dashboard/WhatIfSimulatorModal';
+import { DiagnosticQuizModal } from '../../components/dashboard/DiagnosticQuizModal';
 import { TutorDrawer } from '../../components/tutor/TutorDrawer';
 
 interface Mission {
@@ -38,6 +39,7 @@ export const TodayPage: React.FC = () => {
   } = useGoal();
 
   const [isSimulatorOpen, setIsSimulatorOpen] = useState<boolean>(false);
+  const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
 
   const [missions, setMissions] = useState<Mission[]>([
     {
@@ -115,6 +117,16 @@ export const TodayPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            variant="coral"
+            size="md"
+            onClick={() => setIsQuizOpen(true)}
+            className="gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI Diagnostic Quiz
+          </Button>
+
           <Button
             variant="secondary"
             size="md"
@@ -341,6 +353,12 @@ export const TodayPage: React.FC = () => {
       <WhatIfSimulatorModal
         isOpen={isSimulatorOpen}
         onClose={() => setIsSimulatorOpen(false)}
+      />
+
+      {/* Diagnostic Baseline Quiz Modal */}
+      <DiagnosticQuizModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
       />
 
       {/* Floating AI Tutor Launcher */}
