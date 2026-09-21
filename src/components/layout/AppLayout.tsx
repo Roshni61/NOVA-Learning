@@ -9,7 +9,6 @@ import {
   User as UserIcon,
   Search,
   Flame,
-  ChevronRight,
 } from 'lucide-react';
 import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';

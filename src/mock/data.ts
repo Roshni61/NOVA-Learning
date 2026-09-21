@@ -1,4 +1,4 @@
-import { User, Course, LearningStat } from '../types';
+import type { User, Course, LearningStat } from '../types';
 
 export const mockUser: User = {
   id: 'usr_01',

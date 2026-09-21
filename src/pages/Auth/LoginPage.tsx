@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Lock, Mail, BrainCircuit, TrendingUp, Flame, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock, Mail, Flame, CheckCircle2 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 
 export const LoginPage: React.FC = () => {
