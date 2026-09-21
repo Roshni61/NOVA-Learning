@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Bot,
   Sparkles,
@@ -140,28 +141,46 @@ export const TutorPage: React.FC = () => {
     <div className="space-y-8 max-w-5xl mx-auto pb-10">
       {/* AI TUTOR HERO BANNER */}
       <Card className="bg-gradient-to-br from-nova-charcoal via-slate-900 to-purple-950 p-8 rounded-3xl border border-slate-800 text-white text-center relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-nova-coral/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-nova-lavender/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-nova-coral/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-nova-lavender/20 rounded-full blur-3xl pointer-events-none animate-float-slow" />
 
         <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
-          <div className="relative w-20 h-20 mx-auto">
-            <div className="w-full h-full rounded-3xl bg-gradient-to-tr from-nova-coral via-nova-lavender to-nova-mint p-1 shadow-2xl animate-pulse">
-              <div className="w-full h-full bg-nova-charcoal rounded-[22px] flex items-center justify-center">
-                <Bot className="w-10 h-10 text-nova-coral" />
+          {/* Animated AI Presence Orb */}
+          <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+            {/* Background Halo */}
+            <motion.div
+              animate={isTyping ? { scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] } : { scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ repeat: Infinity, duration: isTyping ? 1.5 : 4, ease: 'easeInOut' }}
+              className="absolute inset-0 rounded-full bg-gradient-to-tr from-nova-coral via-nova-lavender to-nova-mint blur-xl opacity-60"
+            />
+
+            {/* Inner Core Orb */}
+            <motion.div
+              animate={isTyping ? { rotate: 360 } : { y: [0, -4, 0] }}
+              transition={isTyping ? { repeat: Infinity, duration: 8, ease: 'linear' } : { repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+              className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-nova-coral via-purple-500 to-nova-lavender p-0.5 shadow-2xl"
+            >
+              <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center relative overflow-hidden">
+                <Bot className={`w-8 h-8 text-nova-coral transition-all duration-300 ${isTyping ? 'scale-110 text-nova-yellow' : ''}`} />
+                {isTyping && (
+                  <Sparkles className="w-4 h-4 text-nova-mint absolute top-1 right-1 animate-spin" style={{ animationDuration: '3s' }} />
+                )}
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          <Badge variant="lavender" className="bg-white/10 text-purple-200 border-white/20">
-            NOVA AI • Context: {activeConcept.name} ({activeConcept.mastery}%)
+          <Badge variant="lavender" className="bg-white/10 text-purple-200 border-white/20 backdrop-blur-md">
+            NOVA AI Presence • Context: {activeConcept.name} ({activeConcept.mastery}%)
           </Badge>
 
-          <h1 className="text-3xl font-black tracking-tight text-white">
+          <h1 className="text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
             Your Personal Learning Intelligence
           </h1>
 
-          <p className="text-xs text-slate-300 leading-relaxed">
-            "I know what you're learning, where you're struggling, and what to explain next."
+          <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto">
+            {isTyping
+              ? 'NOVA is synthesizing contextual response & generating educational visuals...'
+              : '"I know what you\'re learning, where you\'re struggling, and what to explain next."'}
           </p>
         </div>
       </Card>
@@ -175,19 +194,21 @@ export const TutorPage: React.FC = () => {
           {TUTOR_MODES.map((mode) => {
             const Icon = mode.icon;
             return (
-              <div
+              <motion.div
                 key={mode.id}
+                whileHover={{ y: -3, scale: 1.02, boxShadow: '0 8px 20px -4px rgba(167, 139, 250, 0.2)' }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => handleSendMessage(mode.prompt)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02] flex flex-col justify-between space-y-3 ${mode.color}`}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between space-y-3 ${mode.color}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-xl bg-white/80 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-xl bg-white/90 shadow-sm flex items-center justify-center font-bold">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                  <ArrowRight className="w-3.5 h-3.5 opacity-60 group-hover:translate-x-1 transition-transform" />
                 </div>
                 <h4 className="text-xs font-bold">{mode.title}</h4>
-              </div>
+              </motion.div>
             );
           })}
         </div>

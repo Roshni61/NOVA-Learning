@@ -172,13 +172,14 @@ export const TodayPage: React.FC = () => {
                 key={mission.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ y: -3, scale: 1.01 }}
               >
                 <Card
-                  className={`bg-white p-6 border transition-all ${
+                  className={`bg-white p-6 border transition-all duration-300 ${
                     mission.completed
-                      ? 'border-emerald-200 bg-emerald-50/20 opacity-80'
-                      : 'border-gray-100 hover:border-purple-200'
+                      ? 'border-emerald-200 bg-emerald-50/20 opacity-80 shadow-sm'
+                      : 'border-gray-100 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/5 glow-lavender'
                   }`}
                 >
                   <div className="flex items-start gap-4">
@@ -187,8 +188,8 @@ export const TodayPage: React.FC = () => {
                       onClick={() => toggleMission(mission.id)}
                       className={`w-6 h-6 rounded-lg border-2 mt-1 flex items-center justify-center transition-all ${
                         mission.completed
-                          ? 'bg-emerald-500 border-emerald-500 text-white'
-                          : 'border-gray-300 hover:border-nova-coral bg-white'
+                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
+                          : 'border-gray-300 hover:border-nova-coral bg-white hover:scale-110'
                       }`}
                     >
                       {mission.completed && <CheckCircle2 className="w-4 h-4" />}
@@ -199,22 +200,27 @@ export const TodayPage: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <Badge variant={mission.accent}>{mission.stage}</Badge>
                           <span className="text-xs text-nova-muted font-medium flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5" />
+                            <Clock className="w-3.5 h-3.5 text-nova-coral" />
                             {mission.duration}
                           </span>
                         </div>
 
                         {mission.completed ? (
-                          <span className="text-xs font-bold text-emerald-600">Completed</span>
+                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            ✓ Completed
+                          </span>
                         ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/mission/${mission.conceptId || 'hashmap'}`)}
-                            className="text-xs font-bold gap-1 text-purple-700 hover:text-nova-coral"
-                          >
-                            Start Mission <ArrowRight className="w-3.5 h-3.5" />
-                          </Button>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/mission/${mission.conceptId || 'hashmap'}`)}
+                              className="text-xs font-bold gap-1.5 text-purple-700 hover:text-nova-coral hover:bg-purple-50 border border-purple-100/60 shadow-sm group"
+                            >
+                              <span>Start Mission</span>
+                              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                            </Button>
+                          </motion.div>
                         )}
                       </div>
 
@@ -240,87 +246,109 @@ export const TodayPage: React.FC = () => {
         {/* Right Column: Intelligence & Learning Twin Widgets */}
         <div className="lg:col-span-4 space-y-6">
           {/* Learning Twin Radar / Stats Card */}
-          <Card className="bg-white p-6 border border-gray-100 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-nova-charcoal text-nova-coral font-bold flex items-center justify-center text-sm">
-                  LT
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+            <Card className="bg-white p-6 border border-gray-100 space-y-5 shadow-nova-soft hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-nova-charcoal to-slate-800 text-nova-coral font-extrabold flex items-center justify-center text-sm shadow-md">
+                    LT
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-nova-charcoal text-sm flex items-center gap-1.5">
+                      Learning Twin
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                    </h3>
+                    <p className="text-[11px] text-nova-muted">Real-time Telemetry</p>
+                  </div>
                 </div>
+                <div className="flex items-center gap-1 text-xs font-extrabold text-nova-coral bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
+                  <Flame className="w-4 h-4 fill-nova-coral animate-bounce" />
+                  {streak} Days
+                </div>
+              </div>
+
+              {/* Twin Progress Metrics */}
+              <div className="space-y-3">
                 <div>
-                  <h3 className="font-extrabold text-nova-charcoal text-sm">Learning Twin</h3>
-                  <p className="text-[11px] text-nova-muted">Real-time Telemetry</p>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-nova-muted">Concept Mastery</span>
+                    <span className="text-nova-charcoal">{mastery}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${mastery}%` }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                      className="bg-nova-mint h-full rounded-full"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-extrabold text-nova-coral">
-                <Flame className="w-4 h-4 fill-nova-coral" />
-                {streak} Days
-              </div>
-            </div>
 
-            {/* Twin Progress Metrics */}
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-nova-muted">Concept Mastery</span>
-                  <span className="text-nova-charcoal">{mastery}%</span>
+                <div>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-nova-muted">Knowledge Retention</span>
+                    <span className="text-nova-charcoal">{retention}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${retention}%` }}
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
+                      className="bg-nova-lavender h-full rounded-full"
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-nova-mint h-full rounded-full w-[78%]" />
-                </div>
-              </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-nova-muted">Knowledge Retention</span>
-                  <span className="text-nova-charcoal">{retention}%</span>
+                <div>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-nova-muted">Consistency Score</span>
+                    <span className="text-nova-charcoal">{consistency}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${consistency}%` }}
+                      transition={{ duration: 1.4, ease: 'easeOut' }}
+                      className="bg-nova-coral h-full rounded-full"
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-nova-lavender h-full rounded-full w-[94%]" />
-                </div>
-              </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-nova-muted">Consistency Score</span>
-                  <span className="text-nova-charcoal">{consistency}%</span>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-nova-coral h-full rounded-full w-[92%]" />
+                <div className="pt-2 flex items-center justify-between text-xs font-semibold text-purple-900 bg-purple-50/80 backdrop-blur-sm p-3 rounded-xl border border-purple-100">
+                  <span>Learning Pace</span>
+                  <span className="font-extrabold text-purple-700">{speed} Speed</span>
                 </div>
               </div>
-
-              <div className="pt-2 flex items-center justify-between text-xs font-semibold text-purple-900 bg-purple-50 p-3 rounded-xl border border-purple-100">
-                <span>Learning Pace</span>
-                <span className="font-extrabold text-purple-700">{speed} Speed</span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
 
           {/* AI Next Move Recommender Card */}
-          <Card className="bg-gradient-to-br from-rose-50/80 via-purple-50/80 to-emerald-50/80 p-6 border border-purple-100 space-y-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-nova-coral" />
-              <span className="text-xs font-extrabold text-nova-charcoal uppercase tracking-wider">
-                AI Intelligence Insight
-              </span>
-            </div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
+            <Card className="bg-gradient-to-br from-rose-50/90 via-purple-50/90 to-emerald-50/90 p-6 border border-purple-100/80 space-y-3 shadow-md glow-lavender relative overflow-hidden">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-nova-coral animate-spin" style={{ animationDuration: '6s' }} />
+                <span className="text-xs font-extrabold text-nova-charcoal uppercase tracking-wider">
+                  AI Intelligence Insight
+                </span>
+              </div>
 
-            <h4 className="text-sm font-bold text-nova-charcoal">
-              Why NOVA chose these missions today
-            </h4>
+              <h4 className="text-sm font-bold text-nova-charcoal">
+                Why NOVA chose these missions today
+              </h4>
 
-            <p className="text-xs text-nova-muted leading-relaxed">
-              Detected a minor gap in chain rule matrix differentiation during yesterday's exercise.
-              Prioritizing computational graph practice before advancing to PyTorch Autograd.
-            </p>
+              <p className="text-xs text-nova-muted leading-relaxed">
+                Detected a minor gap in chain rule matrix differentiation during yesterday's exercise.
+                Prioritizing computational graph practice before advancing to PyTorch Autograd.
+              </p>
 
-            <div className="pt-2 border-t border-purple-100/60 flex items-center justify-between text-[11px] font-bold text-purple-800">
-              <span className="flex items-center gap-1">
-                <Lightbulb className="w-3.5 h-3.5 text-nova-yellow fill-nova-yellow" />
-                Adaptive Recommendation
-              </span>
-            </div>
-          </Card>
+              <div className="pt-2 border-t border-purple-100/60 flex items-center justify-between text-[11px] font-bold text-purple-800">
+                <span className="flex items-center gap-1">
+                  <Lightbulb className="w-3.5 h-3.5 text-nova-yellow fill-nova-yellow" />
+                  Adaptive Recommendation
+                </span>
+              </div>
+            </Card>
+          </motion.div>
 
           {/* Quick Revision Queue (Spaced Repetition) */}
           <Card className="bg-white p-6 border border-gray-100 space-y-4">

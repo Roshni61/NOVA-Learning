@@ -118,7 +118,7 @@ export const PathPage: React.FC = () => {
       </div>
 
       {/* Vertical Timeline Roadmap */}
-      <div className="relative pl-6 md:pl-10 space-y-8 border-l-2 border-dashed border-gray-300">
+      <div className="relative pl-6 md:pl-10 space-y-8 border-l-2 border-dashed border-purple-300/80">
         {ROADMAP_MODULES.map((mod, idx) => {
           const isCompleted = mod.status === 'Completed';
           const isActive = mod.status === 'Active';
@@ -128,53 +128,54 @@ export const PathPage: React.FC = () => {
           return (
             <motion.div
               key={mod.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -25 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.08 }}
+              transition={{ duration: 0.4, delay: idx * 0.1 }}
+              whileHover={{ x: 3 }}
               className="relative"
             >
               {/* Timeline Bullet Node */}
               <div
                 className={`absolute -left-[31px] md:-left-[47px] top-6 w-7 h-7 rounded-full border-4 flex items-center justify-center transition-all ${
                   isCompleted
-                    ? 'border-emerald-500 bg-emerald-500 text-white'
+                    ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
                     : mod.isRecovery
-                    ? 'border-rose-500 bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
+                    ? 'border-rose-500 bg-rose-500 text-white animate-pulse ring-4 ring-rose-200 glow-coral'
                     : isActive
-                    ? 'border-nova-coral bg-white text-nova-coral ring-4 ring-rose-100'
+                    ? 'border-nova-coral bg-white text-nova-coral ring-4 ring-rose-100 glow-lavender'
                     : 'border-gray-300 bg-white text-gray-400'
                 }`}
               >
                 {isCompleted && <CheckCircle2 className="w-3.5 h-3.5" />}
-                {mod.isRecovery && <AlertTriangle className="w-3.5 h-3.5" />}
+                {mod.isRecovery && <AlertTriangle className="w-3.5 h-3.5 animate-bounce" />}
               </div>
 
               {/* Module Card */}
               <Card
                 onClick={() => setSelectedModuleId(mod.id)}
-                className={`bg-white p-6 border-2 cursor-pointer transition-all space-y-4 ${
+                className={`bg-white p-6 border-2 cursor-pointer transition-all space-y-4 rounded-3xl ${
                   mod.isRecovery
-                    ? 'border-rose-300 bg-rose-50/40 shadow-lg'
+                    ? 'border-rose-300 bg-rose-50/50 shadow-xl glow-coral'
                     : isSelected
-                    ? 'border-purple-300 shadow-xl'
-                    : 'border-gray-100 hover:border-gray-300'
+                    ? 'border-purple-300 shadow-2xl glow-lavender'
+                    : 'border-gray-100 hover:border-purple-200 hover:shadow-lg'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200">
                       {mod.stage}
                     </span>
                     {mod.isRecovery && (
-                      <Badge variant="coral" className="gap-1 text-[10px]">
-                        <Zap className="w-3 h-3" /> AI Inserted Recovery
+                      <Badge variant="coral" className="gap-1 text-[10px] animate-pulse">
+                        <Zap className="w-3 h-3 text-white" /> AI Inserted Recovery
                       </Badge>
                     )}
                   </div>
 
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-nova-muted flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {mod.estimatedTime}
+                      <Clock className="w-3.5 h-3.5 text-nova-coral" /> {mod.estimatedTime}
                     </span>
                     <Badge
                       variant={
@@ -197,6 +198,28 @@ export const PathPage: React.FC = () => {
                   <p className="text-xs text-nova-muted leading-relaxed">{mod.reason}</p>
                 </div>
 
+                {/* Animated Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-bold text-nova-muted">
+                    <span>Milestone Progress</span>
+                    <span>{mod.progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${mod.progress}%` }}
+                      transition={{ duration: 1, delay: idx * 0.1 }}
+                      className={`h-full rounded-full ${
+                        isCompleted
+                          ? 'bg-emerald-500'
+                          : mod.isRecovery
+                          ? 'bg-rose-500'
+                          : 'bg-gradient-to-r from-nova-coral to-nova-lavender'
+                      }`}
+                    />
+                  </div>
+                </div>
+
                 {/* Progress Bar & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-3 text-xs text-nova-muted font-medium flex-1">
@@ -206,17 +229,19 @@ export const PathPage: React.FC = () => {
                   </div>
 
                   {!isLocked && (
-                    <Button
-                      variant={mod.isRecovery ? 'coral' : 'primary'}
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate('/mission/hashmap');
-                      }}
-                      className="gap-1 font-bold text-xs"
-                    >
-                      Start Milestone <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        variant={mod.isRecovery ? 'coral' : 'primary'}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/mission/hashmap');
+                        }}
+                        className="gap-1 font-bold text-xs shadow-md"
+                      >
+                        Start Milestone <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </motion.div>
                   )}
                 </div>
               </Card>

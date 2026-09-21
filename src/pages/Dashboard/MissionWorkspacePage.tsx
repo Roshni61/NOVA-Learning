@@ -175,22 +175,105 @@ export const MissionWorkspacePage: React.FC = () => {
                 {activeConcept.name} maps input data into discrete representation states. When input dimension sizes expand, structural algorithms compute derivative vectors to adjust parameters towards loss minimization.
               </p>
 
-              {/* Interactive SVG / Structural Flow Diagram */}
-              <div className="bg-slate-900 text-slate-100 p-6 rounded-2xl border border-slate-800 space-y-4 text-center">
-                <div className="text-xs font-mono font-bold text-purple-300 uppercase">
-                  Interactive Data Execution Flow
+              {/* Interactive SVG Educational Diagrams (Neural Net, Backprop, Gradient Descent, Matrix) */}
+              <div className="bg-slate-900 text-slate-100 p-6 rounded-3xl border border-slate-800 space-y-6 shadow-2xl relative overflow-hidden">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="text-xs font-mono font-bold text-purple-300 uppercase flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-nova-coral" />
+                    AI Concept Visualizer
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400">Lightweight Motion Engine</div>
                 </div>
-                <div className="flex items-center justify-around gap-2 text-xs font-mono">
-                  <div className="p-3 bg-slate-800 rounded-xl border border-slate-700 text-nova-coral">
-                    Input [X]
+
+                {/* Diagram tabs */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  {/* Neural Net & Signal Flow */}
+                  <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div className="text-[11px] font-mono font-bold text-nova-coral uppercase text-center">
+                      1. Neural Signal Flow
+                    </div>
+                    <svg className="w-full h-28" viewBox="0 0 200 100">
+                      {/* Connections */}
+                      <line x1="30" y1="30" x2="100" y2="25" stroke="#475569" strokeWidth="1.5" />
+                      <line x1="30" y1="30" x2="100" y2="75" stroke="#475569" strokeWidth="1.5" />
+                      <line x1="30" y1="70" x2="100" y2="25" stroke="#475569" strokeWidth="1.5" />
+                      <line x1="30" y1="70" x2="100" y2="75" stroke="#475569" strokeWidth="1.5" />
+                      <line x1="100" y1="25" x2="170" y2="50" stroke="#475569" strokeWidth="1.5" />
+                      <line x1="100" y1="75" x2="170" y2="50" stroke="#475569" strokeWidth="1.5" />
+
+                      {/* Signal dots */}
+                      <circle cx="30" cy="30" r="8" fill="#FF6B6B" />
+                      <circle cx="30" cy="70" r="8" fill="#FF6B6B" />
+                      <circle cx="100" cy="25" r="8" fill="#A78BFA" />
+                      <circle cx="100" cy="75" r="8" fill="#A78BFA" />
+                      <circle cx="170" cy="50" r="8" fill="#34D399" />
+
+                      <text x="30" y="34" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">X1</text>
+                      <text x="30" y="74" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">X2</text>
+                      <text x="100" y="29" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">H1</text>
+                      <text x="100" y="79" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">H2</text>
+                      <text x="170" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">Out</text>
+
+                      {/* Animated Pulse */}
+                      <circle cx="65" cy="27" r="3" fill="#FCD34D" className="animate-ping" />
+                      <circle cx="135" cy="37" r="3" fill="#FCD34D" className="animate-ping" style={{ animationDelay: '0.5s' }} />
+                    </svg>
+                    <div className="text-[10px] text-center text-slate-400 font-mono">
+                      Input → Hidden Layer → Output
+                    </div>
                   </div>
-                  <span>→</span>
-                  <div className="p-3 bg-purple-950 rounded-xl border border-purple-700 text-purple-200">
-                    Weights [W]
+
+                  {/* Gradient Descent Curve */}
+                  <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div className="text-[11px] font-mono font-bold text-nova-mint uppercase text-center">
+                      2. Gradient Descent Curve
+                    </div>
+                    <svg className="w-full h-28" viewBox="0 0 200 100">
+                      {/* Parabola curve */}
+                      <path d="M 20 20 Q 100 110 180 20" fill="none" stroke="#A78BFA" strokeWidth="2.5" />
+                      {/* Minimum marker */}
+                      <line x1="100" y1="60" x2="100" y2="85" stroke="#34D399" strokeWidth="1" strokeDasharray="3 3" />
+                      <text x="100" y="94" fontSize="8" fill="#34D399" textAnchor="middle" fontWeight="bold">Min Loss J(w)</text>
+
+                      {/* Oscillating ball */}
+                      <motion.circle
+                        cx="40"
+                        cy="35"
+                        r="6"
+                        fill="#FF6B6B"
+                        animate={{ cx: [40, 70, 95, 100], cy: [35, 53, 64, 65] }}
+                        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+                      />
+                    </svg>
+                    <div className="text-[10px] text-center text-slate-400 font-mono">
+                      w ← w - α ∇J(w)
+                    </div>
                   </div>
-                  <span>→</span>
-                  <div className="p-3 bg-emerald-950 rounded-xl border border-emerald-700 text-emerald-300">
-                    Activation [y_hat]
+
+                  {/* Matrix Transformation */}
+                  <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div className="text-[11px] font-mono font-bold text-purple-300 uppercase text-center">
+                      3. Matrix Transformation
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900 rounded-xl border border-slate-800 text-[10px] font-mono text-center">
+                      <motion.div
+                        animate={{ scale: [1, 1.08, 1], backgroundColor: ['#1e293b', '#3b0764', '#1e293b'] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="p-2.5 rounded-lg border border-purple-500/40 text-purple-200"
+                      >
+                        [w11  w12]
+                      </motion.div>
+                      <motion.div
+                        animate={{ scale: [1, 1.08, 1], backgroundColor: ['#1e293b', '#064e3b', '#1e293b'] }}
+                        transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
+                        className="p-2.5 rounded-lg border border-emerald-500/40 text-emerald-200"
+                      >
+                        [x1  x2]^T
+                      </motion.div>
+                    </div>
+                    <div className="text-[10px] text-center text-slate-400 font-mono">
+                      Y = W · X + B
+                    </div>
                   </div>
                 </div>
               </div>

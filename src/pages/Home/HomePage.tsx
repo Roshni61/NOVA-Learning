@@ -67,22 +67,32 @@ export const HomePage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-24 md:pt-20 md:pb-32 px-6 max-w-7xl mx-auto w-full">
-        {/* Ambient background blur blobs */}
-        <div className="absolute top-10 left-1/4 w-96 h-96 bg-nova-lavender/20 rounded-full blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute top-40 right-1/4 w-80 h-80 bg-nova-coral/15 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <section className="relative pt-12 pb-24 md:pt-20 md:pb-32 px-6 max-w-7xl mx-auto w-full overflow-hidden">
+        {/* Ambient AI Background Lights & Particle Atmosphere */}
+        <div className="absolute top-10 left-1/4 w-96 h-96 bg-nova-lavender/25 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse-glow" />
+        <div className="absolute top-40 right-1/4 w-80 h-80 bg-nova-coral/20 rounded-full blur-3xl -z-10 pointer-events-none animate-float-slow" />
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-r from-purple-500/10 via-nova-coral/10 to-emerald-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+        {/* Floating Neural Particles Canvas SVG overlay */}
+        <svg className="absolute inset-0 w-full h-full -z-10 opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="15%" cy="25%" r="3" fill="#FF6B6B" className="animate-ping" style={{ animationDuration: '4s' }} />
+          <circle cx="85%" cy="30%" r="4" fill="#A78BFA" className="animate-ping" style={{ animationDuration: '6s' }} />
+          <circle cx="50%" cy="15%" r="2" fill="#34D399" className="animate-ping" style={{ animationDuration: '5s' }} />
+          <line x1="15%" y1="25%" x2="50%" y2="15%" stroke="#A78BFA" strokeWidth="1" strokeDasharray="4 4" className="neural-line" />
+          <line x1="50%" y1="15%" x2="85%" y2="30%" stroke="#FF6B6B" strokeWidth="1" strokeDasharray="4 4" className="neural-line" />
+        </svg>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column Text */}
           <motion.div
             className="lg:col-span-7 flex flex-col gap-6 text-left"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <div className="inline-flex items-center gap-2 self-start">
-              <Badge variant="lavender" className="px-3.5 py-1.5 text-xs">
-                <Sparkles className="w-3.5 h-3.5 text-purple-700" />
+              <Badge variant="lavender" className="px-3.5 py-1.5 text-xs shadow-sm backdrop-blur-md bg-white/80 border-purple-200">
+                <Sparkles className="w-3.5 h-3.5 text-purple-700 animate-spin" style={{ animationDuration: '8s' }} />
                 Next-Gen Continuous AI Learning Platform
               </Badge>
             </div>
@@ -101,15 +111,21 @@ export const HomePage: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
               <Link to="/onboarding">
-                <button className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-nova-coral via-rose-500 to-purple-600 text-white font-semibold text-base shadow-nova-soft hover:shadow-nova-hover hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(255, 107, 107, 0.4)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-nova-coral via-rose-500 to-purple-600 text-white font-semibold text-base shadow-nova-soft transition-all flex items-center justify-center gap-3 cursor-pointer"
+                >
                   Start Your Journey
-                  <ArrowRight className="w-5 h-5" />
-                </button>
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </motion.button>
               </Link>
               <Link to="/login">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Explore Knowledge Universe
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto border-gray-300 backdrop-blur-sm bg-white/80">
+                    Explore Knowledge Universe
+                  </Button>
+                </motion.div>
               </Link>
             </div>
 
@@ -129,17 +145,17 @@ export const HomePage: React.FC = () => {
           {/* Right Column: Floating Animated Learning Twin Preview Card */}
           <motion.div
             className="lg:col-span-5 relative"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.94, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             {/* Animated Floating Card */}
             <motion.div
-              animate={{ y: [0, -10, 0] }}
+              animate={{ y: [0, -12, 0] }}
               transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
               className="relative z-10"
             >
-              <Card className="bg-white/90 backdrop-blur-xl border border-white/80 p-6 md:p-8 rounded-3xl shadow-2xl space-y-6">
+              <Card className="bg-white/90 backdrop-blur-xl border border-white/80 p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 glow-lavender">
                 {/* Header inside Card */}
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                   <div className="flex items-center gap-3">
@@ -147,7 +163,10 @@ export const HomePage: React.FC = () => {
                       LT
                     </div>
                     <div>
-                      <h3 className="font-bold text-nova-charcoal text-base">Learning Twin</h3>
+                      <h3 className="font-bold text-nova-charcoal text-base flex items-center gap-1.5">
+                        Learning Twin
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      </h3>
                       <p className="text-xs text-nova-muted">Live Student Intelligence</p>
                     </div>
                   </div>
@@ -158,29 +177,40 @@ export const HomePage: React.FC = () => {
 
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-nova-bg p-4 rounded-2xl border border-gray-100">
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-nova-bg p-4 rounded-2xl border border-gray-100/80 shadow-sm"
+                  >
                     <div className="flex items-center gap-2 text-xs font-medium text-nova-muted mb-1">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
                       Retention Rate
                     </div>
                     <div className="text-2xl font-black text-nova-charcoal">94%</div>
                     <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                      <div className="bg-nova-mint h-full rounded-full w-[94%]" />
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: '94%' }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        className="bg-nova-mint h-full rounded-full"
+                      />
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="bg-nova-bg p-4 rounded-2xl border border-gray-100">
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-nova-bg p-4 rounded-2xl border border-gray-100/80 shadow-sm"
+                  >
                     <div className="flex items-center gap-2 text-xs font-medium text-nova-muted mb-1">
-                      <Flame className="w-4 h-4 text-nova-coral" />
+                      <Flame className="w-4 h-4 text-nova-coral animate-bounce" />
                       Active Streak
                     </div>
                     <div className="text-2xl font-black text-nova-charcoal">12 Days</div>
                     <p className="text-[11px] text-emerald-600 font-medium mt-1">Top 5% Learner</p>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Current Mission Preview */}
-                <div className="bg-gradient-to-br from-purple-50 via-white to-rose-50 p-4 rounded-2xl border border-purple-100 space-y-2">
+                <div className="bg-gradient-to-br from-purple-50 via-white to-rose-50 p-4 rounded-2xl border border-purple-100 space-y-2 relative overflow-hidden">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-purple-900 flex items-center gap-1.5">
                       <BrainCircuit className="w-4 h-4 text-purple-600" />
@@ -200,10 +230,12 @@ export const HomePage: React.FC = () => {
 
                 {/* Interactive Action Preview */}
                 <Link to="/today" className="block">
-                  <Button variant="primary" size="md" className="w-full justify-between group">
-                    <span>Launch Today's Feed</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button variant="primary" size="md" className="w-full justify-between group">
+                      <span>Launch Today's Feed</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </motion.div>
                 </Link>
               </Card>
             </motion.div>
@@ -214,7 +246,7 @@ export const HomePage: React.FC = () => {
               transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', delay: 1 }}
               className="absolute -top-4 -left-4 z-20 hidden sm:block"
             >
-              <div className="bg-nova-charcoal text-white px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-xl flex items-center gap-2 border border-gray-700">
+              <div className="bg-nova-charcoal text-white px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-xl flex items-center gap-2 border border-gray-700 glow-yellow">
                 <Award className="w-4 h-4 text-nova-yellow" />
                 <span>Goal Readiness: 68%</span>
               </div>
