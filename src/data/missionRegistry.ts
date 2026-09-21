@@ -1,3 +1,8 @@
+/**
+ * NOVA Mission Content Registry
+ * Central single-source-of-truth providing distinct educational learning content,
+ * concept explanations, visual diagrams, code tasks, and AI intents per mission.
+ */
 import type { MissionDetail } from '../types';
 
 export const MISSION_REGISTRY: Record<string, MissionDetail> = {
