@@ -1,14 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 
-const DEFAULT_DB_URL = 'postgresql://neondb_owner:npg_secret123@ep-spring-moon-b5snw814.us-east-2.aws.neon.tech/neondb?sslmode=require';
-
 function getSqlInstance() {
   const envUrl = import.meta.env.VITE_NEON_DATABASE_URL;
-  const urlToUse = envUrl && envUrl.includes('@') ? envUrl : DEFAULT_DB_URL;
+  if (!envUrl || typeof envUrl !== 'string' || !envUrl.includes('@')) {
+    console.warn('VITE_NEON_DATABASE_URL is missing or invalid. Neon database connection disabled.');
+    return null;
+  }
   try {
-    return neon(urlToUse);
+    return neon(envUrl);
   } catch (e) {
-    console.warn('Neon connection fallback initialized:', e);
+    console.warn('Neon connection failed:', e);
     return null;
   }
 }
