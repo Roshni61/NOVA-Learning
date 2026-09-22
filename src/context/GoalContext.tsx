@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type {
   ConceptNodeData,
   ConceptEdge,
@@ -6,6 +6,7 @@ import type {
   Achievement,
   SkillRadarItem,
   ConceptStatus,
+  PathMilestone,
 } from '../types';
 import { INITIAL_CONCEPTS, INITIAL_EDGES } from '../data/universeData';
 
@@ -28,6 +29,7 @@ export interface GoalState {
   missions: Mission[];
   achievements: Achievement[];
   skillRadar: SkillRadarItem[];
+  pathMilestones: PathMilestone[];
   setGoal: (goal: string) => void;
   setTimeline: (months: number, hours: number) => void;
   updateGoalData: (data: Partial<GoalState>) => void;
@@ -39,6 +41,172 @@ export interface GoalState {
 }
 
 const GoalContext = createContext<GoalState | undefined>(undefined);
+
+export const INITIAL_MILESTONES: PathMilestone[] = [
+  {
+    milestoneId: 'python-ds',
+    title: 'Python & Data Structures',
+    category: 'FOUNDATIONS',
+    concepts: ['python', 'data-structures', 'hashmap'],
+    prerequisites: [],
+    missions: ['python-data-structures', 'hashmap-hashing'],
+    masteryRequirement: 70,
+    currentMastery: 75,
+    progress: 100,
+    estimatedDuration: '2 weeks',
+    unlockConditions: ['Initial unlocked foundational milestone'],
+    status: 'Completed',
+    reason: 'Prerequisite foundation for all data structures and machine learning algorithms.',
+    unlockedProjects: ['CLI Data Pipeline'],
+  },
+  {
+    milestoneId: 'statistics',
+    title: 'Statistics',
+    category: 'MATHEMATICS',
+    concepts: ['probability'],
+    prerequisites: ['python-ds'],
+    missions: ['matrix-calculus-gradient-descent'],
+    masteryRequirement: 70,
+    currentMastery: 72,
+    progress: 100,
+    estimatedDuration: '2 weeks',
+    unlockConditions: ['Complete Python & Data Structures with >= 70% mastery'],
+    status: 'Completed',
+    reason: 'Core probability distributions, Bayesian inference, and statistical hypothesis testing.',
+    unlockedProjects: ['Statistical A/B Test Suite'],
+  },
+  {
+    milestoneId: 'linear-algebra',
+    title: 'Linear Algebra',
+    category: 'MATHEMATICS',
+    concepts: ['linear-algebra', 'calculus'],
+    prerequisites: ['statistics'],
+    missions: ['linear-algebra-calculus', 'matrix-calculus-gradient-descent'],
+    masteryRequirement: 70,
+    currentMastery: 75,
+    progress: 100,
+    estimatedDuration: '3 weeks',
+    unlockConditions: ['Complete Statistics with >= 70% mastery'],
+    status: 'Completed',
+    reason: 'Essential for matrix transformations, vector spaces, and gradient propagation.',
+    unlockedProjects: ['NumPy Neural Net Engine'],
+  },
+  {
+    milestoneId: 'machine-learning',
+    title: 'Machine Learning',
+    category: 'MACHINE LEARNING',
+    concepts: ['supervised-learning', 'regression', 'decision-trees'],
+    prerequisites: ['linear-algebra'],
+    missions: ['supervised-learning', 'numpy-loss-function'],
+    masteryRequirement: 75,
+    currentMastery: 78,
+    progress: 100,
+    estimatedDuration: '4 weeks',
+    unlockConditions: ['Complete Linear Algebra with >= 70% mastery'],
+    status: 'Completed',
+    reason: 'Supervised learning, classification metrics, feature engineering, and ensemble methods.',
+    unlockedProjects: ['Predictive Analytics Dashboard'],
+  },
+  {
+    milestoneId: 'deep-learning',
+    title: 'Deep Learning',
+    category: 'DEEP LEARNING',
+    concepts: ['neural-networks', 'backprop', 'optimization', 'transformers'],
+    prerequisites: ['machine-learning'],
+    missions: ['backpropagation-computational-graphs', 'transformers'],
+    masteryRequirement: 75,
+    currentMastery: 64,
+    progress: 30,
+    estimatedDuration: '5 weeks',
+    unlockConditions: ['Complete Machine Learning with >= 75% mastery'],
+    status: 'Active',
+    reason: 'Neural network autograd, backpropagation, and Transformer self-attention architectures.',
+    unlockedProjects: ['PyTorch Transformer Engine'],
+  },
+  {
+    milestoneId: 'advanced-ai',
+    title: 'Advanced AI',
+    category: 'AI SYSTEMS',
+    concepts: ['llms', 'embeddings', 'rag', 'agents'],
+    prerequisites: ['deep-learning'],
+    missions: ['rag'],
+    masteryRequirement: 80,
+    currentMastery: 24,
+    progress: 0,
+    estimatedDuration: '4 weeks',
+    unlockConditions: ['Complete Deep Learning with >= 75% mastery'],
+    status: 'Locked',
+    reason: 'Retrieval Augmented Generation (RAG), vector indexing, and multi-agent systems.',
+    unlockedProjects: ['Enterprise Autonomous RAG Agent'],
+  },
+];
+
+export function computeMilestoneProgression(
+  milestones: PathMilestone[],
+  concepts: ConceptNodeData[],
+  missions: Mission[]
+): PathMilestone[] {
+  const updated = milestones.map((m) => {
+    const mConcepts = concepts.filter((c) => m.concepts.includes(c.id));
+    const currentMastery =
+      mConcepts.length > 0
+        ? Math.round(mConcepts.reduce((acc, c) => acc + c.mastery, 0) / mConcepts.length)
+        : m.currentMastery;
+
+    const mMissions = m.missions;
+    let completedCount = 0;
+    mMissions.forEach((mId) => {
+      const found = missions.find((mItem) => mItem.id === mId || mItem.conceptId === mId);
+      if (found && found.completed) {
+        completedCount++;
+      }
+    });
+
+    const totalMissions = mMissions.length || 1;
+    let progress = Math.round((completedCount / totalMissions) * 100);
+
+    if (completedCount === 0) {
+      progress = Math.min(95, Math.round((currentMastery / m.masteryRequirement) * 100));
+    } else if (currentMastery >= m.masteryRequirement) {
+      progress = 100;
+    }
+
+    return {
+      ...m,
+      currentMastery,
+      progress,
+    };
+  });
+
+  return updated.map((m) => {
+    if (m.prerequisites.length === 0) {
+      const isComplete = m.currentMastery >= m.masteryRequirement;
+      return {
+        ...m,
+        status: isComplete ? ('Completed' as const) : ('Active' as const),
+      };
+    }
+
+    const prereqsSatisfied = m.prerequisites.every((prereqId) => {
+      const prereqMilestone = updated.find((item) => item.milestoneId === prereqId);
+      return prereqMilestone && prereqMilestone.currentMastery >= prereqMilestone.masteryRequirement;
+    });
+
+    if (prereqsSatisfied) {
+      const isComplete = m.currentMastery >= m.masteryRequirement;
+      return {
+        ...m,
+        status: isComplete ? ('Completed' as const) : ('Active' as const),
+      };
+    } else {
+      return {
+        ...m,
+        status: 'Locked' as const,
+      };
+    }
+  });
+}
+
 
 const INITIAL_MISSIONS: Mission[] = [
   {
@@ -129,6 +297,13 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [missions, setMissions] = useState<Mission[]>(INITIAL_MISSIONS);
   const [achievements, setAchievements] = useState<Achievement[]>(INITIAL_ACHIEVEMENTS);
   const [skillRadar] = useState<SkillRadarItem[]>(INITIAL_SKILL_RADAR);
+  const [pathMilestones, setPathMilestones] = useState<PathMilestone[]>(() =>
+    computeMilestoneProgression(INITIAL_MILESTONES, INITIAL_CONCEPTS, INITIAL_MISSIONS)
+  );
+
+  useEffect(() => {
+    setPathMilestones(computeMilestoneProgression(INITIAL_MILESTONES, concepts, missions));
+  }, [concepts, missions]);
 
   const setGoal = (goal: string) => setTargetGoal(goal);
   const setTimeline = (months: number, hours: number) => {
@@ -247,6 +422,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         missions,
         achievements,
         skillRadar,
+        pathMilestones,
         setGoal,
         setTimeline,
         updateGoalData,

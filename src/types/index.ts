@@ -129,3 +129,21 @@ export interface MissionDetail {
     testCasesDescription: string;
   };
 }
+
+export interface PathMilestone {
+  milestoneId: string;
+  title: string;
+  category: string;
+  concepts: string[];
+  prerequisites: string[];
+  missions: string[];
+  masteryRequirement: number;
+  currentMastery: number;
+  progress: number;
+  estimatedDuration: string;
+  unlockConditions: string[];
+  status: 'Completed' | 'Active' | 'Unlocked' | 'Locked';
+  reason?: string;
+  unlockedProjects?: string[];
+}
+

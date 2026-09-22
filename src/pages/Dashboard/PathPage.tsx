@@ -1,260 +1,387 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitCommit,
   CheckCircle2,
   ArrowRight,
-  AlertTriangle,
   Clock,
-  Zap,
+  Lock,
+  Target,
+  BookOpen,
+  Award,
+  Layers,
+  ChevronRight,
+  ShieldAlert,
 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
 
-const ROADMAP_MODULES = [
-  {
-    id: 'mod_1',
-    missionId: 'python-data-structures',
-    stage: 'FOUNDATIONS',
-    title: 'Python & Data Structures Mastery',
-    estimatedTime: '2 weeks',
-    status: 'Completed',
-    progress: 100,
-    conceptCount: 5,
-    unlockedProjects: ['CLI Data Pipeline'],
-    reason: 'Prerequisite foundation for all machine learning algorithms.',
-  },
-  {
-    id: 'mod_2',
-    missionId: 'linear-algebra-calculus',
-    stage: 'MATHEMATICS',
-    title: 'Linear Algebra & Multivariate Calculus',
-    estimatedTime: '3 weeks',
-    status: 'Active',
-    progress: 75,
-    conceptCount: 4,
-    unlockedProjects: ['NumPy Neural Net Engine'],
-    reason: 'Essential for matrix gradient descent and backpropagation.',
-  },
-  {
-    id: 'mod_recovery_hashmap',
-    missionId: 'hashmap-hashing',
-    stage: 'AI ADAPTIVE RECOVERY',
-    title: 'HashMap & Collision Handling Intensive',
-    estimatedTime: '3 hours',
-    status: 'Recommended',
-    progress: 48,
-    isRecovery: true,
-    conceptCount: 1,
-    unlockedProjects: ['LRU Cache & System Design'],
-    reason: 'AI inserted this recovery module because HashMap accuracy (53%) is below the required 70% threshold for System Design.',
-  },
-  {
-    id: 'mod_3',
-    missionId: 'supervised-learning',
-    stage: 'MACHINE LEARNING',
-    title: 'Supervised Learning & Model Evaluation',
-    estimatedTime: '4 weeks',
-    status: 'Active',
-    progress: 60,
-    conceptCount: 6,
-    unlockedProjects: ['Predictive Analytics Dashboard'],
-    reason: 'Core ML modeling techniques and feature engineering.',
-  },
-  {
-    id: 'mod_4',
-    missionId: 'transformers',
-    stage: 'DEEP LEARNING',
-    title: 'Neural Networks & Transformer Architectures',
-    estimatedTime: '5 weeks',
-    status: 'Recommended',
-    progress: 30,
-    conceptCount: 5,
-    unlockedProjects: ['PyTorch Transformer Engine'],
-    reason: 'Foundation for modern Generative AI and LLMs.',
-  },
-  {
-    id: 'mod_5',
-    missionId: 'rag',
-    stage: 'AI SYSTEMS',
-    title: 'Retrieval Augmented Generation (RAG) & Agents',
-    estimatedTime: '4 weeks',
-    status: 'Locked',
-    progress: 0,
-    conceptCount: 4,
-    unlockedProjects: ['Enterprise Autonomous RAG Agent'],
-    reason: 'Advanced production AI engineering deployment.',
-  },
-];
-
 export const PathPage: React.FC = () => {
   const navigate = useNavigate();
-  const { targetGoal, monthsToTarget } = useGoal();
-  const [selectedModuleId, setSelectedModuleId] = useState<string | null>('mod_recovery_hashmap');
+  const { targetGoal, monthsToTarget, pathMilestones, concepts, missions } = useGoal();
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>('deep-learning');
+
+  const selectedMilestone = pathMilestones.find((m) => m.milestoneId === selectedMilestoneId) || pathMilestones[0];
+
+  const completedMilestonesCount = pathMilestones.filter((m) => m.status === 'Completed').length;
+  const overallRoadmapProgress = Math.round((completedMilestonesCount / (pathMilestones.length || 1)) * 100);
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Header */}
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+      {/* Header Banner */}
       <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-nova-soft flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
           <Badge variant="coral" className="gap-1.5">
             <GitCommit className="w-3.5 h-3.5" />
-            Adaptive Roadmap Intelligence
+            Connected Learning Progression Path
           </Badge>
           <h1 className="text-2xl md:text-3xl font-black text-nova-charcoal">
-            {targetGoal} Learning Path
+            {targetGoal} Long-Term Roadmap
           </h1>
           <p className="text-sm text-nova-muted font-medium">
-            Dynamic timeline continuously adjusted by your Learning Twin telemetry.
+            Milestones dynamically update and unlock based on real mission completions and concept mastery ({monthsToTarget} Months Target).
           </p>
         </div>
 
         <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center flex items-center gap-4">
           <div>
-            <div className="text-[10px] font-bold text-nova-muted">Target Timeline</div>
-            <div className="text-base font-black text-nova-charcoal">{monthsToTarget} Months</div>
+            <div className="text-[10px] font-bold text-nova-muted uppercase">Roadmap Unlocked</div>
+            <div className="text-base font-black text-emerald-600">
+              {completedMilestonesCount}/{pathMilestones.length} Completed
+            </div>
           </div>
           <div className="w-px h-8 bg-gray-300" />
           <div>
-            <div className="text-[10px] font-bold text-nova-muted">Path Mode</div>
-            <div className="text-xs font-black text-purple-700">Adaptive AI</div>
+            <div className="text-[10px] font-bold text-nova-muted uppercase">Overall Progress</div>
+            <div className="text-base font-black text-purple-700">{overallRoadmapProgress}%</div>
           </div>
         </div>
       </div>
 
-      {/* Vertical Timeline Roadmap */}
-      <div className="relative pl-6 md:pl-10 space-y-8 border-l-2 border-dashed border-purple-300/80">
-        {ROADMAP_MODULES.map((mod, idx) => {
-          const isCompleted = mod.status === 'Completed';
-          const isActive = mod.status === 'Active';
-          const isLocked = mod.status === 'Locked';
-          const isSelected = selectedModuleId === mod.id;
 
-          return (
-            <motion.div
-              key={mod.id}
-              initial={{ opacity: 0, x: -25 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.1 }}
-              whileHover={{ x: 3 }}
-              className="relative"
-            >
-              {/* Timeline Bullet Node */}
-              <div
-                className={`absolute -left-[31px] md:-left-[47px] top-6 w-7 h-7 rounded-full border-4 flex items-center justify-center transition-all ${
-                  isCompleted
-                    ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
-                    : mod.isRecovery
-                    ? 'border-rose-500 bg-rose-500 text-white animate-pulse ring-4 ring-rose-200 glow-coral'
-                    : isActive
-                    ? 'border-nova-coral bg-white text-nova-coral ring-4 ring-rose-100 glow-lavender'
-                    : 'border-gray-300 bg-white text-gray-400'
-                }`}
+      {/* Main Container: Roadmap Timeline & Inspector */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Vertical Roadmap Timeline */}
+        <div className="lg:col-span-7 relative pl-6 md:pl-10 space-y-8 border-l-2 border-dashed border-purple-300/80">
+          {pathMilestones.map((milestone, idx) => {
+            const isCompleted = milestone.status === 'Completed';
+            const isActive = milestone.status === 'Active';
+            const isLocked = milestone.status === 'Locked';
+            const isSelected = selectedMilestoneId === milestone.milestoneId;
+
+            return (
+              <motion.div
+                key={milestone.milestoneId}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.08 }}
+                className="relative"
               >
-                {isCompleted && <CheckCircle2 className="w-3.5 h-3.5" />}
-                {mod.isRecovery && <AlertTriangle className="w-3.5 h-3.5 animate-bounce" />}
-              </div>
-
-              {/* Module Card */}
-              <Card
-                onClick={() => setSelectedModuleId(mod.id)}
-                className={`bg-white p-6 border-2 cursor-pointer transition-all space-y-4 rounded-3xl ${
-                  mod.isRecovery
-                    ? 'border-rose-300 bg-rose-50/50 shadow-xl glow-coral'
-                    : isSelected
-                    ? 'border-purple-300 shadow-2xl glow-lavender'
-                    : 'border-gray-100 hover:border-purple-200 hover:shadow-lg'
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200">
-                      {mod.stage}
-                    </span>
-                    {mod.isRecovery && (
-                      <Badge variant="coral" className="gap-1 text-[10px] animate-pulse">
-                        <Zap className="w-3 h-3 text-white" /> AI Inserted Recovery
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-nova-muted flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-nova-coral" /> {mod.estimatedTime}
-                    </span>
-                    <Badge
-                      variant={
-                        isCompleted
-                          ? 'mint'
-                          : mod.isRecovery
-                          ? 'coral'
-                          : isActive
-                          ? 'lavender'
-                          : 'outline'
-                      }
-                    >
-                      {mod.status}
-                    </Badge>
-                  </div>
+                {/* Connector Arrow/Bullet Node */}
+                <div
+                  className={`absolute -left-[31px] md:-left-[47px] top-6 w-7 h-7 rounded-full border-4 flex items-center justify-center transition-all ${
+                    isCompleted
+                      ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
+                      : isActive
+                      ? 'border-nova-coral bg-white text-nova-coral ring-4 ring-rose-100 glow-lavender animate-pulse'
+                      : 'border-gray-300 bg-gray-100 text-gray-400'
+                  }`}
+                >
+                  {isCompleted && <CheckCircle2 className="w-3.5 h-3.5" />}
+                  {isActive && <Target className="w-3.5 h-3.5" />}
+                  {isLocked && <Lock className="w-3 h-3 text-gray-400" />}
                 </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-lg font-extrabold text-nova-charcoal">{mod.title}</h3>
-                  <p className="text-xs text-nova-muted leading-relaxed">{mod.reason}</p>
-                </div>
+                {/* Milestone Card */}
+                <Card
+                  onClick={() => setSelectedMilestoneId(milestone.milestoneId)}
+                  className={`bg-white p-6 border-2 cursor-pointer transition-all space-y-4 rounded-3xl ${
+                    isSelected
+                      ? 'border-purple-400 shadow-xl glow-lavender ring-2 ring-purple-100'
+                      : isCompleted
+                      ? 'border-emerald-100 bg-emerald-50/20 hover:border-emerald-300'
+                      : isActive
+                      ? 'border-rose-200 bg-rose-50/20 hover:border-nova-coral'
+                      : 'border-gray-100 hover:border-gray-200 opacity-90'
+                  }`}
+                >
+                  {/* Top Bar: Category & Status */}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200">
+                        {milestone.category}
+                      </span>
+                      <span className="text-[10px] font-mono text-nova-muted">
+                        ID: {milestone.milestoneId}
+                      </span>
+                    </div>
 
-                {/* Animated Progress Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px] font-bold text-nova-muted">
-                    <span>Milestone Progress</span>
-                    <span>{mod.progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${mod.progress}%` }}
-                      transition={{ duration: 1, delay: idx * 0.1 }}
-                      className={`h-full rounded-full ${
-                        isCompleted
-                          ? 'bg-emerald-500'
-                          : mod.isRecovery
-                          ? 'bg-rose-500'
-                          : 'bg-gradient-to-r from-nova-coral to-nova-lavender'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                {/* Progress Bar & Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-xs text-nova-muted font-medium flex-1">
-                    <span>{mod.conceptCount} Concepts</span>
-                    <span>•</span>
-                    <span>Unlocks: {mod.unlockedProjects.join(', ')}</span>
-                  </div>
-
-                  {!isLocked && (
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        variant={mod.isRecovery ? 'coral' : 'primary'}
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/mission/${mod.missionId}`);
-                        }}
-                        className="gap-1 font-bold text-xs shadow-md"
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-nova-muted flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-nova-coral" /> {milestone.estimatedDuration}
+                      </span>
+                      <Badge
+                        variant={
+                          isCompleted ? 'mint' : isActive ? 'coral' : 'outline'
+                        }
                       >
-                        Start Milestone <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                      </Button>
-                    </motion.div>
-                  )}
-                </div>
-              </Card>
-            </motion.div>
-          );
-        })}
+                        {isCompleted ? '✓ Completed' : isActive ? '⚡ Active' : '🔒 Locked'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Title & Description */}
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-nova-charcoal flex items-center justify-between">
+                      <span>{milestone.title}</span>
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </h3>
+                    <p className="text-xs text-nova-muted leading-relaxed font-medium">
+                      {milestone.reason}
+                    </p>
+                  </div>
+
+                  {/* Dynamic Real Progress Bar & Mastery */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-nova-muted flex items-center gap-1">
+                        <Award className="w-3.5 h-3.5 text-purple-600" />
+                        Mastery: {milestone.currentMastery}% / {milestone.masteryRequirement}% Target
+                      </span>
+                      <span className={isCompleted ? 'text-emerald-600' : 'text-nova-coral'}>
+                        {milestone.progress}% Progress
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${milestone.progress}%` }}
+                        transition={{ duration: 0.8, delay: idx * 0.05 }}
+                        className={`h-full rounded-full ${
+                          isCompleted
+                            ? 'bg-emerald-500'
+                            : isActive
+                            ? 'bg-gradient-to-r from-nova-coral to-nova-lavender'
+                            : 'bg-gray-300'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bottom Bar: Concepts, Unlock Conditions & Start Button */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100">
+                    <div className="text-xs text-nova-muted font-medium space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-nova-charcoal">Concepts:</span>
+                        {milestone.concepts.map((cId) => (
+                          <span key={cId} className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded">
+                            {cId}
+                          </span>
+                        ))}
+                      </div>
+                      {isLocked && milestone.unlockConditions.length > 0 && (
+                        <div className="text-[11px] text-amber-700 font-medium flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-amber-600 flex-shrink-0" />
+                          <span>{milestone.unlockConditions[0]}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      {!isLocked ? (
+                        <Button
+                          variant={isCompleted ? 'secondary' : 'coral'}
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const primaryMissionId = milestone.missions[0] || 'backpropagation-computational-graphs';
+                            navigate(`/mission/${primaryMissionId}`);
+                          }}
+                          className="gap-1 font-bold text-xs shadow-sm w-full sm:w-auto"
+                        >
+                          {isCompleted ? 'Review Milestone' : 'Start Milestone Mission'}{' '}
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      ) : (
+                        <button
+                          disabled
+                          className="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-400 text-xs font-bold flex items-center gap-1.5 cursor-not-allowed w-full sm:w-auto justify-center border border-gray-200"
+                        >
+                          <Lock className="w-3.5 h-3.5" /> Locked Milestone
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Right Column: Milestone Inspector Drawer / Detailed Card */}
+        <div className="lg:col-span-5">
+          <div className="sticky top-6 space-y-6">
+            <AnimatePresence mode="wait">
+              {selectedMilestone && (
+                <motion.div
+                  key={selectedMilestone.milestoneId}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="bg-white p-6 border-2 border-purple-200 shadow-nova-soft space-y-6 rounded-3xl">
+                    {/* Header */}
+                    <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="coral" className="text-[10px]">
+                            {selectedMilestone.category}
+                          </Badge>
+                          <span className="text-[10px] font-mono text-nova-muted font-bold">
+                            {selectedMilestone.milestoneId}
+                          </span>
+                        </div>
+                        <h2 className="text-xl font-black text-nova-charcoal">
+                          {selectedMilestone.title}
+                        </h2>
+                      </div>
+                      <Badge
+                        variant={
+                          selectedMilestone.status === 'Completed'
+                            ? 'mint'
+                            : selectedMilestone.status === 'Active'
+                            ? 'coral'
+                            : 'outline'
+                        }
+                      >
+                        {selectedMilestone.status}
+                      </Badge>
+                    </div>
+
+                    {/* Milestone Mastery & Requirement Telemetry */}
+                    <div className="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 space-y-3">
+                      <div className="flex items-center justify-between text-xs font-bold text-purple-950">
+                        <span className="flex items-center gap-1">
+                          <Target className="w-4 h-4 text-purple-700" /> Milestone Mastery Level
+                        </span>
+                        <span>{selectedMilestone.currentMastery}% / {selectedMilestone.masteryRequirement}% Target</span>
+                      </div>
+                      <div className="w-full bg-purple-200/60 h-2.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            selectedMilestone.currentMastery >= selectedMilestone.masteryRequirement
+                              ? 'bg-emerald-500'
+                              : 'bg-purple-600'
+                          }`}
+                          style={{ width: `${Math.min(100, selectedMilestone.currentMastery)}%` }}
+                        />
+                      </div>
+                      <p className="text-[11px] text-purple-900 leading-relaxed font-medium">
+                        {selectedMilestone.currentMastery >= selectedMilestone.masteryRequirement
+                          ? `✓ Mastery requirement (${selectedMilestone.masteryRequirement}%) achieved! Next milestone unlocked.`
+                          : `Requires ${selectedMilestone.masteryRequirement - selectedMilestone.currentMastery}% more mastery in concept nodes to complete milestone.`}
+                      </p>
+                    </div>
+
+                    {/* Included Concepts Breakdown */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-nova-charcoal flex items-center gap-1.5">
+                        <BookOpen className="w-4 h-4 text-nova-coral" /> Included Concept Nodes ({selectedMilestone.concepts.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {selectedMilestone.concepts.map((cId) => {
+                          const conceptObj = concepts.find((c) => c.id === cId);
+                          return (
+                            <div key={cId} className="p-3 bg-nova-bg rounded-xl border border-gray-200 space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold text-nova-charcoal">{conceptObj?.name || cId}</span>
+                                <span className="font-extrabold text-purple-700">{conceptObj?.mastery || 50}% Mastery</span>
+                              </div>
+                              <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className="bg-purple-600 h-full rounded-full"
+                                  style={{ width: `${conceptObj?.mastery || 50}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Associated Missions */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-nova-charcoal flex items-center gap-1.5">
+                        <Layers className="w-4 h-4 text-emerald-600" /> Milestone Missions ({selectedMilestone.missions.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {selectedMilestone.missions.map((mId) => {
+                          const foundMission = missions.find((m) => m.id === mId || m.conceptId === mId);
+                          return (
+                            <div key={mId} className="p-3 bg-white rounded-xl border border-gray-200 flex items-center justify-between text-xs">
+                              <div>
+                                <div className="font-bold text-nova-charcoal">{foundMission?.title || mId}</div>
+                                <div className="text-[10px] text-nova-muted">Stage: {foundMission?.stage || 'Learn'}</div>
+                              </div>
+                              <Badge variant={foundMission?.completed ? 'mint' : 'outline'} className="text-[10px]">
+                                {foundMission?.completed ? '✓ Completed' : 'Pending'}
+                              </Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Prerequisites & Unlock Conditions */}
+                    <div className="space-y-2 pt-2 border-t border-gray-100 text-xs">
+                      <div className="flex justify-between text-nova-muted">
+                        <span className="font-semibold">Prerequisite Milestones:</span>
+                        <span className="font-bold text-nova-charcoal">
+                          {selectedMilestone.prerequisites.length > 0 ? selectedMilestone.prerequisites.join(', ') : 'None (Foundational)'}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="font-semibold text-nova-muted block">Unlock Conditions:</span>
+                        {selectedMilestone.unlockConditions.map((cond, i) => (
+                          <div key={i} className="text-[11px] font-medium text-purple-900 bg-purple-50 p-2 rounded-lg border border-purple-100 flex items-center gap-1.5">
+                            <ShieldAlert className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
+                            <span>{cond}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="pt-2">
+                      {selectedMilestone.status !== 'Locked' ? (
+                        <Button
+                          variant="coral"
+                          size="md"
+                          onClick={() => {
+                            const targetMissionId = selectedMilestone.missions[0] || 'backpropagation-computational-graphs';
+                            navigate(`/mission/${targetMissionId}`);
+                          }}
+                          className="w-full gap-2 font-bold text-xs"
+                        >
+                          <span>Execute {selectedMilestone.title} Mission</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button variant="secondary" size="md" disabled className="w-full text-xs font-bold cursor-not-allowed">
+                          Locked - Satisfy Prerequisite Mastery First
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+

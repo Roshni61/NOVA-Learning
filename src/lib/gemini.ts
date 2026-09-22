@@ -35,7 +35,16 @@ const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 function normalizeContext(
   input: string | MissionQuestionContext,
   defaultDifficulty = 'Intermediate'
-): Required<MissionQuestionContext> {
+): {
+  missionId: string;
+  title: string;
+  concept: string;
+  subConcept: string;
+  learningObjective: string;
+  difficulty: string;
+  learnerMastery: number;
+  previousPerformance: string;
+} {
   if (typeof input === 'object' && input !== null) {
     return {
       missionId: input.missionId || 'backpropagation-computational-graphs',
@@ -48,6 +57,7 @@ function normalizeContext(
       previousPerformance: input.previousPerformance || 'Solid initial grasp with active practice in tensor derivatives',
     };
   }
+
 
   // Handle string title input
   const titleStr = input || 'Backpropagation & Computational Graphs';
@@ -174,7 +184,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q1',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Computational Graphs',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'In computational graph backpropagation, how is the partial derivative dL/dx for an input variable calculated during the backward sweep?',
         options: [
           'By multiplying the incoming upstream gradient dL/dy by the local partial derivative dy/dx using the chain rule.',
@@ -192,7 +202,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q2',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Reverse Topological Order',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Which graph traversal strategy ensures nodes are evaluated in valid dependency order during autograd backpropagation?',
         options: [
           'Reverse Topological Sort',
@@ -210,7 +220,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q3',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Multivariate Chain Rule',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'When an intermediate variable u in a computational graph feeds into two downstream branches (y and z), how is dL/du computed?',
         options: [
           'By accumulating (summing) the gradients from both downstream paths: dL/du = (dL/dy * dy/du) + (dL/dz * dz/du).',
@@ -228,7 +238,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q4',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Addition Node Gradient Flow',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'In a computational graph node computing addition `z = x + y`, what are the local partial derivatives dz/dx and dz/dy?',
         options: [
           'dz/dx = 1.0 and dz/dy = 1.0 (gradient passes through unchanged to both inputs).',
@@ -246,7 +256,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q5',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Multiplication Node Gradient Flow',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'For a multiplication operation node `z = x * y`, what is the local derivative dz/dx?',
         options: [
           'y (the current forward-pass value of the co-operand)',
@@ -264,7 +274,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q6',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Autograd Activation Storage',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Why do deep learning autograd engines (e.g. PyTorch, Micrograd) consume extra memory during training compared to inference?',
         options: [
           'They must cache intermediate activation values during the forward pass to compute local derivatives during the backward pass.',
@@ -282,7 +292,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q7',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Vanishing Gradients',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What is the mathematical cause of the vanishing gradient problem in deep computational graphs using Sigmoid activations?',
         options: [
           'Sigmoid derivative d/dx Sigmoid(x) maxes out at 0.25, causing repeated multiplication across N layers to shrink gradients exponentially toward zero.',
@@ -300,7 +310,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q8',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Autograd Debugging',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Debug snippet: Running `loss.backward()` twice in a training loop without calling `optimizer.zero_grad()`. What defect occurs?',
         options: [
           'Gradients accumulate into `.grad` buffers, doubling gradient magnitude and breaking gradient descent step updates.',
@@ -318,7 +328,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q9',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Leaf Node Definition',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'In PyTorch / autograd computational graphs, what distinguishes a Leaf Tensor from an Intermediate Tensor?',
         options: [
           'Leaf tensors are created explicitly by the user (like weight parameters) rather than resulting from graph operations.',
@@ -336,7 +346,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q10',
         missionId: 'backpropagation-computational-graphs',
         concept: 'Vector-Jacobian Product (VJP)',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Why do modern reverse-mode autograd frameworks compute Vector-Jacobian Products (VJPs) rather than full explicit Jacobian matrices?',
         options: [
           'VJP computes gradient v^T * J directly in O(N) time without allocating massive N x M Jacobian matrices in GPU memory.',
@@ -360,7 +370,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q1',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Gradient Dimension Matching',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Given a scalar loss L and a weight matrix W of dimension (128, 64), what MUST be the shape of the gradient tensor dL/dW?',
         options: [
           'Exactly (128, 64), matching the shape of W.',
@@ -378,7 +388,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q2',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Matrix Product Derivative',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'For linear transformation output Y = X @ W (where X is (32, 128) and W is (128, 64)), what is the matrix derivative dL/dW given output gradient dL/dY (32, 64)?',
         options: [
           'X^T @ dL/dY with resulting shape (128, 64)',
@@ -396,7 +406,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q3',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Jacobian Matrix Definition',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What is a Jacobian matrix J in multivariate matrix calculus?',
         options: [
           'A matrix containing all first-order partial derivatives of a vector-valued function f: R^n -> R^m.',
@@ -414,7 +424,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q4',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Gradient Step Formula',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What is the standard matrix gradient descent update rule for parameter matrix W given learning rate alpha and gradient dL/dW?',
         options: [
           'W_new = W_old - alpha * dL/dW',
@@ -432,7 +442,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q5',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Hessian Matrix Properties',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What does the Hessian matrix H measure on a multivariate loss surface?',
         options: [
           'Second-order partial derivatives measuring local curvature and loss surface steepness.',
@@ -450,7 +460,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q6',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Matrix Input Gradient dL/dX',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'In Y = X @ W (where X is batch (32, 128) and W is weights (128, 64)), how is the gradient w.r.t input X (dL/dX) calculated?',
         options: [
           'dL/dY @ W^T with shape (32, 128)',
@@ -468,7 +478,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q7',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Momentum Parameter Update',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'How does Momentum modify the matrix gradient descent update step?',
         options: [
           'It maintains a velocity vector V = beta * V + (1 - beta) * dL/dW and updates W = W - alpha * V to damp oscillations.',
@@ -486,7 +496,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q8',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Exploding Gradients',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What occurs during matrix gradient descent when spectral norms of weight derivative matrices exceed 1.0 across deep iterations?',
         options: [
           'Exploding gradients, causing weight values to saturate to NaN or Inf.',
@@ -504,7 +514,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q9',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Elementwise Hadamard Derivative',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'When an elementwise activation function f(Z) is applied to matrix Z, how is its derivative combined with incoming gradient dL/dA?',
         options: [
           'Hadamard (elementwise) multiplication: dL/dZ = dL/dA * f\'(Z)',
@@ -522,7 +532,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q10',
         missionId: 'matrix-calculus-gradient-descent',
         concept: 'Frobenius Norm Gradient Clipping',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What is the purpose of computing the Frobenius norm ||dL/dW||_F during matrix optimization?',
         options: [
           'To clip total gradient norm if it exceeds a threshold C: dW = dW * (C / ||dW||_F) to prevent divergence.',
@@ -546,7 +556,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q1',
         missionId: 'numpy-loss-functions',
         concept: 'Binary Cross-Entropy Stability',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'When implementing Binary Cross-Entropy loss in NumPy `L = -y*log(p) - (1-y)*log(1-p)`, why MUST predictions `p` be clipped with `np.clip(p, 1e-15, 1 - 1e-15)`?',
         options: [
           'To prevent `np.log(0)` from evaluating to `-inf`, which produces `NaN` in total loss calculations.',
@@ -564,7 +574,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q2',
         missionId: 'numpy-loss-functions',
         concept: 'Mean Squared Error Vectorization',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Which one-line NumPy expression correctly computes Mean Squared Error (MSE) across batched predictions `y_pred` and targets `y_true`?',
         options: [
           'np.mean((y_pred - y_true) ** 2)',
@@ -582,7 +592,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q3',
         missionId: 'numpy-loss-functions',
         concept: 'Categorical Cross Entropy NumPy Axis',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'For a batch of shape (N, C) containing probabilities `P` and one-hot labels `Y`, how is average loss computed in NumPy?',
         options: [
           '-np.mean(np.sum(Y * np.log(P), axis=1))',
@@ -600,7 +610,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q4',
         missionId: 'numpy-loss-functions',
         concept: 'Softmax + Cross Entropy Gradient',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What is the remarkably simple analytical gradient expression `dL/dz` for Softmax probabilities `P` combined with Categorical Cross Entropy targets `Y`?',
         options: [
           'dL/dz = P - Y',
@@ -618,7 +628,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q5',
         missionId: 'numpy-loss-functions',
         concept: 'NumPy Broadcasting Bug',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Debug bug: `y_pred` has shape (32,) and `y_true` has shape (32, 1). Why does `(y_pred - y_true)**2` produce a matrix of shape (32, 32) instead of a vector?',
         options: [
           'NumPy broadcasting auto-expands 1D (32,) and 2D (32, 1) to form an outer 32x32 grid. Fix: call `y_true.squeeze()` or `y_pred.reshape(-1, 1)`.',
@@ -636,7 +646,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q6',
         missionId: 'numpy-loss-functions',
         concept: 'L2 Regularization Weight Penalty',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'How is L2 weight regularization added to a base loss function `L_base` in NumPy for weight matrices `W1` and `W2`?',
         options: [
           'L_total = L_base + 0.5 * reg_lambda * (np.sum(W1**2) + np.sum(W2**2))',
@@ -654,7 +664,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q7',
         missionId: 'numpy-loss-functions',
         concept: 'NumPy Log-Sum-Exp Trick',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Why is `log(sum(exp(x)))` computed using the Log-Sum-Exp trick `max(x) + log(sum(exp(x - max(x))))` in NumPy Softmax/Loss functions?',
         options: [
           'To prevent numerical overflow (`exp(1000) -> inf`) when exponentiating large logit numbers.',
@@ -672,7 +682,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q8',
         missionId: 'numpy-loss-functions',
         concept: 'Vectorization Performance',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'Why is a vectorized NumPy loss calculation ~100x faster than an explicit Python `for` loop over 100,000 samples?',
         options: [
           'NumPy delegates array calculations to contiguous C memory buffers using SIMD CPU vector instructions.',
@@ -690,7 +700,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q9',
         missionId: 'numpy-loss-functions',
         concept: 'Huber Loss Robustness',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'What advantage does Huber Loss have over Mean Squared Error (MSE) when training on datasets containing extreme outliers in NumPy?',
         options: [
           'Huber loss transitions from quadratic error for small errors to linear error for large errors, preventing outliers from dominating gradients.',
@@ -708,7 +718,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
         id: 'q10',
         missionId: 'numpy-loss-functions',
         concept: 'Gradient Checking with Finite Differences',
-        difficulty: ctx.difficulty,
+        difficulty: ctx.difficulty || 'Intermediate',
         question: 'How does finite difference gradient checking verify custom NumPy loss gradient function `compute_grad(W)`?',
         options: [
           'By checking if `(loss(W + h) - loss(W - h)) / (2 * h)` matches `compute_grad(W)` within a small relative tolerance (e.g. 1e-7).',
@@ -731,7 +741,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q1',
       missionId: 'hashmap-and-hashing',
       concept: 'Time Complexity',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'What is the average time complexity of key lookup, insertion, and deletion in a well-implemented HashMap?',
       options: [
         'O(1) constant average time complexity.',
@@ -749,7 +759,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q2',
       missionId: 'hashmap-and-hashing',
       concept: 'Hash Collisions',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'What occurs when two distinct keys (e.g. "keyA" and "keyB") compute to the exact same hash table bucket index?',
       options: [
         'A Hash Collision.',
@@ -767,7 +777,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q3',
       missionId: 'hashmap-and-hashing',
       concept: 'Separate Chaining',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'How does Separate Chaining resolve hash collisions when multiple keys land in the same bucket?',
       options: [
         'By maintaining a linked list or dynamic bucket array at each bucket location to hold colliding key-value entries.',
@@ -785,7 +795,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q4',
       missionId: 'hashmap-and-hashing',
       concept: 'Open Addressing Linear Probing',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'In Open Addressing with Linear Probing, what step is taken when a collision occurs at bucket index `i`?',
       options: [
         'Sequentially probe consecutive slots `(i + 1) % capacity, (i + 2) % capacity` until an available empty slot is found.',
@@ -803,7 +813,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q5',
       missionId: 'hashmap-and-hashing',
       concept: 'Load Factor & Rehashing',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'What is the HashMap Load Factor defined as, and what action does exceeding its threshold (e.g. 0.75) trigger?',
       options: [
         'Ratio N / K (stored items / bucket capacity). Exceeding threshold triggers table resizing (doubling) and entry rehashing.',
@@ -821,7 +831,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q6',
       missionId: 'hashmap-and-hashing',
       concept: 'Mutable Key Pitfall',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'Why is modifying an object\'s fields AFTER storing it as a key in a HashMap considered a critical bug?',
       options: [
         'The object\'s computed hash code changes, making it impossible to locate the key in its original bucket during lookups.',
@@ -839,7 +849,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q7',
       missionId: 'hashmap-and-hashing',
       concept: 'Worst-Case Time Complexity',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'Under what degenerate scenario does HashMap lookup time complexity degrade from average O(1) to worst-case O(N)?',
       options: [
         'When a poor or malicious hash function causes ALL N keys to collapse into the exact same bucket.',
@@ -857,7 +867,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q8',
       missionId: 'hashmap-and-hashing',
       concept: 'Amortized Complexity',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'Although HashMap resizing requires O(N) time to rehash all elements, why is insertion still considered O(1) amortized time?',
       options: [
         'Resizing occurs infrequently (doubling capacity each time), distributing the O(N) cost over N cheap O(1) insertion operations.',
@@ -875,7 +885,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q9',
       missionId: 'hashmap-and-hashing',
       concept: 'HashDoS Security Vulnerability',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'What is a HashDoS (Hash Denial of Service) attack against web servers relying on default HashMaps for HTTP parameter parsing?',
       options: [
         'An attacker sends engineered HTTP request keys that deliberately collide in the same bucket, spiking server CPU to O(N^2) parsing time.',
@@ -893,7 +903,7 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
       id: 'q10',
       missionId: 'hashmap-and-hashing',
       concept: 'Two-Sum Problem Application',
-      difficulty: ctx.difficulty,
+      difficulty: ctx.difficulty || 'Intermediate',
       question: 'How does using a HashMap optimize the classic Two-Sum algorithm from O(N^2) brute force to O(N) linear time complexity?',
       options: [
         'By storing visited array elements in the map and checking if complement `target - num` exists in O(1) lookup time per element.',
