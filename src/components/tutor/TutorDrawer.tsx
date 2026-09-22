@@ -34,7 +34,7 @@ export const TutorDrawer: React.FC = () => {
     {
       id: 'm1',
       sender: 'ai',
-      text: "Hello Roshni! I'm NOVA AI, your continuous learning tutor. We are currently focusing on 'Backpropagation & Computational Graphs'. How can I help you master this concept?",
+      text: "Hey there, Coder! I'm NOVA AI, your continuous learning tutor. We are currently focusing on 'Backpropagation & Computational Graphs'. How can I help you master this concept?",
       timestamp: '10:30 AM',
     },
   ]);
