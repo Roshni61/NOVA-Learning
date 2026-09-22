@@ -135,8 +135,8 @@ export const ExplainConceptModal: React.FC<ExplainConceptModalProps> = ({ concep
                 <div className="bg-slate-900 text-slate-100 p-4 rounded-2xl font-mono text-xs overflow-x-auto border border-slate-800 space-y-2">
                   <div className="text-slate-500">// Inserting key-value pair in Python</div>
                   <div><span className="text-purple-400">user_scores</span> = {}</div>
-                  <div><span className="text-purple-400">user_scores</span>[<span className="text-emerald-300">"Roshni"</span>] = <span className="text-amber-300">98</span>  <span className="text-slate-500"># O(1) Insert</span></div>
-                  <div>print(<span className="text-purple-400">user_scores</span>.get(<span className="text-emerald-300">"Roshni"</span>)) <span className="text-slate-500"># O(1) Lookup: 98</span></div>
+                  <div><span className="text-purple-400">user_scores</span>[<span className="text-emerald-300">"user"</span>] = <span className="text-amber-300">98</span>  <span className="text-slate-500"># O(1) Insert</span></div>
+                  <div>print(<span className="text-purple-400">user_scores</span>.get(<span className="text-emerald-300">"user"</span>)) <span className="text-slate-500"># O(1) Lookup: 98</span></div>
                 </div>
 
                 <div className="flex justify-between pt-2">
