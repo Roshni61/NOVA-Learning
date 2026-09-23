@@ -130,3 +130,23 @@ export const VideoPlayerSkeleton: React.FC = () => {
     </div>
   );
 };
+
+/**
+ * Skeleton loader for full page route transitions in Suspense.
+ */
+export const PageSkeleton: React.FC = () => {
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto p-6 font-sans animate-pulse">
+      <div className="h-24 bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 p-6 flex items-center justify-between">
+        <Skeleton className="w-64 h-8" />
+        <Skeleton className="w-32 h-10 rounded-2xl" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+        <CourseCardSkeleton />
+      </div>
+    </div>
+  );
+};
+

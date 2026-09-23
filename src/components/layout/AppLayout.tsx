@@ -129,6 +129,8 @@ export const AppLayout: React.FC = () => {
             <img
               src={mockUser.avatarUrl}
               alt={`Avatar of ${mockUser.name}`}
+              loading="lazy"
+              decoding="async"
               className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-slate-600"
             />
           </Link>
