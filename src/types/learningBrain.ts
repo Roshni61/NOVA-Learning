@@ -13,9 +13,12 @@ export interface ConceptMastery {
 export interface LearningEvent {
   id: string;
   timestamp: number;
+  userId?: string;
   conceptId: string;
   accuracy: number;
   durationMs: number;
+  eventType?: string;
+  misconceptionId?: string;
 }
 
 export interface LearnerBrainState {
