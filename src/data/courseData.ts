@@ -1,488 +1,450 @@
-export interface CourseLesson {
+export interface Lesson {
   id: string;
   title: string;
-  duration: string; // e.g. "9m 27s"
-  videoUrl?: string;
-  completed?: boolean;
+  duration: string;
+  videoId: string;
+  summary?: string;
   missionId?: string;
 }
 
-export interface CourseModule {
+export type CourseLesson = Lesson;
+
+export interface Module {
   id: string;
   title: string;
+  summary?: string;
   description?: string;
-  duration: string; // e.g. "1h 10m"
-  lessons: CourseLesson[];
+  lessons: Lesson[];
 }
+
+export type CourseModule = Module;
 
 export interface DetailedCourse {
   id: string;
   title: string;
+  headline: string;
   description: string;
-  longDescription: string;
-  category: string;
+  longDescription?: string;
   instructor: string;
-  instructorRole?: string;
+  instructorRole: string;
   instructorAvatar?: string;
-  duration: string; // e.g. "16h 55m"
+  duration: string;
   totalModules: number;
   totalLessons: number;
-  rating: number;
+  rating?: number;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  access: string; // e.g. "Free"
-  language: string; // e.g. "English (EN)"
-  thumbnail: string;
+  access: 'Free' | 'Enrolled' | 'Premium';
+  language: string;
+  category: string;
+  defaultVideoId: string;
+  thumbnail?: string;
   accentColor?: string;
-  modules: CourseModule[];
+  modules: Module[];
 }
 
-export const DETAILED_COURSES: Record<string, DetailedCourse> = {
+export const detailedCourses: Record<string, DetailedCourse> = {
   c_101: {
     id: 'c_101',
     title: 'Modern UI/UX Design Systems',
-    description: 'Master atomic design principles, dynamic typography scale, design tokens, and WCAG AA accessibility.',
-    longDescription:
-      'An in-depth guide to help you master modern UI/UX design systems. Learn how to transform raw user research and wireframes into enterprise-grade design systems. Covers tokenized dynamic themes, responsive spacing grids, atomic component architecture, dark mode accessibility, and fluid CSS variable setups.',
-    category: 'UI/UX & Design',
+    headline: 'Master component-driven design, tokens, and micro-interactions.',
+    description:
+      'An in-depth guide to help you master modern digital interface design. Learn to architect scalable design systems in Figma, structure design tokens, construct accessible micro-interactions, and build cohesive user experiences that seamlessly transition from concept to engineering.',
     instructor: 'Elena Vance',
-    instructorRole: 'Principal Design System Architect',
+    instructorRole: 'Principal Product Designer',
     instructorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    duration: '14h 20m',
+    duration: '14 hrs',
     totalModules: 4,
-    totalLessons: 16,
+    totalLessons: 12,
     rating: 4.9,
     level: 'Intermediate',
     access: 'Free',
     language: 'English (EN)',
+    category: 'UI/UX Design',
+    defaultVideoId: 'c9Wg6Cb_YlU',
     thumbnail: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&auto=format&fit=crop&q=80',
     accentColor: '#F43F5E',
     modules: [
       {
-        id: 'mod_101_1',
-        title: 'Design Tokens & Foundations',
-        description: 'Establishing scalable design primitives, tokenized color palettes, and typographic hierarchies.',
-        duration: '3h 15m',
+        id: 'c101_m1',
+        title: 'Design Systems Foundations & Tokens',
+        summary: 'Atomic design philosophy, primitive scales, semantic colors, and design token naming architectures.',
         lessons: [
           {
-            id: 'les_101_1_1',
-            title: 'Intro to Tokenized Design Primitives',
-            duration: '8m 45s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            completed: true,
+            id: 'c101_m1_l1',
+            title: 'Design System Architecture & Atomic Design',
+            duration: '14m 20s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Understanding atoms, molecules, organisms, and enterprise system scales.',
           },
           {
-            id: 'les_101_1_2',
-            title: 'Constructing Harmonious HSL Color Scales',
-            duration: '12m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            id: 'c101_m1_l2',
+            title: 'Typography Hierarchies & Spacing Scales',
+            duration: '18m 10s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Establishing mathematical fluid typography and 4px/8px modular layout grids.',
           },
           {
-            id: 'les_101_1_3',
-            title: 'Fluid Typography & Spacing Systems',
-            duration: '14m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-          },
-          {
-            id: 'les_101_1_4',
-            title: 'CSS Custom Properties & Theme Synchronization',
-            duration: '15m 20s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            id: 'c101_m1_l3',
+            title: 'Color Palettes & Semantic Token Mapping',
+            duration: '22m 15s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'WCAG AA accessible contrast ratios and light/dark theme token definitions.',
           },
         ],
       },
       {
-        id: 'mod_101_2',
-        title: 'Component Architecture & Atomic Design',
-        description: 'Building modular, reusable React components guided by Atomic Design guidelines.',
-        duration: '3h 45m',
+        id: 'c101_m2',
+        title: 'Component Architecture in Figma',
+        summary: 'Deep dive into auto-layout rules, component properties, slots, and interactive variant matrices.',
         lessons: [
           {
-            id: 'les_101_2_1',
-            title: 'Atomic Design Hierarchy (Atoms to Organisms)',
-            duration: '10m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            id: 'c101_m2_l1',
+            title: 'Auto-Layout 5.0 & Responsive Containers',
+            duration: '19m 40s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Building flex-like component wrappers with min/max bounds and truncation safety.',
           },
           {
-            id: 'les_101_2_2',
-            title: 'Designing Accessible Button & Touch Target Components',
-            duration: '14m 50s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            id: 'c101_m2_l2',
+            title: 'Component Properties & Nested State Variants',
+            duration: '25m 05s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Boolean flags, text properties, and instance swaps for enterprise components.',
           },
           {
-            id: 'les_101_2_3',
-            title: 'Input Fields, Validation States & Form Patterns',
-            duration: '18m 00s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-          },
-          {
-            id: 'les_101_2_4',
-            title: 'Card Layouts & Dynamic Content Containers',
-            duration: '16m 25s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+            id: 'c101_m2_l3',
+            title: 'Accessible Form Controls & Micro-States',
+            duration: '21m 30s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Designing focus rings, error validations, disabled bounds, and active states.',
           },
         ],
       },
       {
-        id: 'mod_101_3',
-        title: 'Micro-Animations & Motion Design',
-        description: 'Enhancing visual feedback with spring physics, layout animations, and fluid transitions.',
-        duration: '3h 30m',
+        id: 'c101_m3',
+        title: 'Micro-Interactions & Prototyping',
+        summary: 'Interactive components, spring animations, timing curves, and state machines.',
         lessons: [
           {
-            id: 'les_101_3_1',
-            title: 'Principles of Functional UI Animations',
-            duration: '9m 20s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreet.mp4',
+            id: 'c101_m3_l1',
+            title: 'Smart Animate & Physics-Based Transitions',
+            duration: '16m 45s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Creating natural easing curves and realistic UI inertia.',
           },
           {
-            id: 'les_101_3_2',
-            title: 'Framer Motion Spring Physics & Damping',
-            duration: '13m 40s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            id: 'c101_m3_l2',
+            title: 'Interactive Accordions, Drawers & Sheets',
+            duration: '23m 10s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Prototyping fluid off-canvas panels with gesture triggers.',
           },
           {
-            id: 'les_101_3_3',
-            title: 'Shared Layout Animations & Modal Transitions',
-            duration: '16m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-          },
-          {
-            id: 'les_101_3_4',
-            title: 'Gesture Handlers & Swipe Actions',
-            duration: '11m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+            id: 'c101_m3_l3',
+            title: 'Usability Testing & Design Heuristic Audits',
+            duration: '17m 50s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Running unmoderated user sessions and benchmarking task success metrics.',
           },
         ],
       },
       {
-        id: 'mod_101_4',
-        title: 'Accessibility (WCAG 2.1) & System Auditing',
-        description: 'Rigorous accessibility verification, screen reader testing, and automated linting.',
-        duration: '3h 50m',
+        id: 'c101_m4',
+        title: 'Design-to-Code Handoff & Governance',
+        summary: 'Connecting design tokens directly into Tailwind CSS and React component libraries.',
         lessons: [
           {
-            id: 'les_101_4_1',
-            title: 'WCAG 2.1 Contrast Ratios & Visual Perception',
-            duration: '11m 05s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-          },
-          {
-            id: 'les_101_4_2',
-            title: 'Keyboard Navigation & Focus Ring Traps',
+            id: 'c101_m4_l1',
+            title: 'Exporting Tokens to JSON & CSS Variables',
             duration: '15m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Bridging design decisions to automated code pipelines with Style Dictionary.',
           },
           {
-            id: 'les_101_4_3',
-            title: 'ARIA Roles, Live Regions & Screen Reader Traversal',
-            duration: '17m 40s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            id: 'c101_m4_l2',
+            title: 'Component Library Documentation in Storybook',
+            duration: '20m 15s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Writing clean usage guides and visual regression testing suites.',
           },
           {
-            id: 'les_101_4_4',
-            title: 'Automated Axe Audits & CI Integration',
-            duration: '12m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            id: 'c101_m4_l3',
+            title: 'Version Control & System Release Cycles',
+            duration: '14m 50s',
+            videoId: 'c9Wg6Cb_YlU',
+            summary: 'Managing breaking component updates across multiple product teams.',
           },
         ],
       },
     ],
   },
-
   c_102: {
     id: 'c_102',
     title: 'Advanced React & TypeScript Architecture',
-    description: 'Deep dive into concurrent rendering, state machine patterns, dynamic imports, and memory optimization.',
-    longDescription:
-      'An in-depth guide to help you master React 19 and TypeScript design patterns. Dive deep into concurrent rendering, fiber reconciler internals, custom state machines, type-safe APIs, dynamic code splitting, memory leak auditing, and scalable front-end state management.',
-    category: 'Web Architecture',
+    headline: 'Build enterprise-ready web applications with scalability in mind.',
+    description:
+      'A comprehensive engineering program designed for senior software developers. Master strict TypeScript configurations, custom hooks, performant rendering lifecycles, state machine architectures, and modular component design patterns.',
     instructor: 'Marcus Chen',
-    instructorRole: 'Principal Software Architect',
+    instructorRole: 'Staff Frontend Engineer',
     instructorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    duration: '16h 55m',
+    duration: '20 hrs',
     totalModules: 4,
-    totalLessons: 15,
+    totalLessons: 12,
     rating: 4.95,
     level: 'Advanced',
     access: 'Free',
     language: 'English (EN)',
+    category: 'Web Architecture',
+    defaultVideoId: '30LWjhZzg50',
     thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=80',
     accentColor: '#8B5CF6',
     modules: [
       {
-        id: 'mod_102_1',
-        title: 'Advanced TypeScript Patterns',
-        description: 'Conditional types, mapped types, template literal types, and complex type guards.',
-        duration: '4h 10m',
+        id: 'c102_m1',
+        title: 'Strict TypeScript Foundations in React',
+        summary: 'Generic components, polymorphic props, discriminated unions, and mapped types.',
         lessons: [
           {
-            id: 'les_102_1_1',
-            title: 'Generics, Invariance & Covariance Deep Dive',
-            duration: '14m 20s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            completed: true,
+            id: 'c102_m1_l1',
+            title: 'Setting Up Strict tsconfig & Project References',
+            duration: '18m 45s',
+            videoId: '30LWjhZzg50',
+            summary: 'Enabling noImplicitAny, strictNullChecks, and incremental monorepo builds.',
             missionId: 'matrix-calculus-gradient-descent',
           },
           {
-            id: 'les_102_1_2',
-            title: 'Template Literal Types & Type-Safe Event Emitters',
-            duration: '18m 45s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            id: 'c102_m1_l2',
+            title: 'Discriminated Unions for UI State Modeling',
+            duration: '22m 30s',
+            videoId: '30LWjhZzg50',
+            summary: 'Eliminating impossible states in async loaders and network requests.',
           },
           {
-            id: 'les_102_1_3',
-            title: 'Conditional Types & Infer Keyword Magic',
-            duration: '16m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-          },
-          {
-            id: 'les_102_1_4',
-            title: 'Custom Type Guards & Discriminated Unions',
-            duration: '13m 50s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            id: 'c102_m1_l3',
+            title: 'Polymorphic Components with "as" Props',
+            duration: '26m 10s',
+            videoId: '30LWjhZzg50',
+            summary: 'Building flexible design system buttons and links with full type safety.',
           },
         ],
       },
       {
-        id: 'mod_102_2',
-        title: 'React Core Engine & Custom Hooks',
-        description: 'React Fiber reconciler, Concurrent features, useTransition, and custom hook lifecycle.',
-        duration: '4h 15m',
+        id: 'c102_m2',
+        title: 'Performance Profiling & Render Optimization',
+        summary: 'Eliminating unwanted re-renders with React Profiler, memoization, and concurrent rendering.',
         lessons: [
           {
-            id: 'les_102_2_1',
-            title: 'React Fiber Reconciler & Scheduling Pipeline',
-            duration: '19m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            id: 'c102_m2_l1',
+            title: 'React Fiber Internals & Virtual DOM Lifecycles',
+            duration: '24m 15s',
+            videoId: '30LWjhZzg50',
+            summary: 'Understanding reconciliation, commit phases, and lane priority scheduling.',
           },
           {
-            id: 'les_102_2_2',
-            title: 'Mastering useTransition & useDeferredValue',
-            duration: '15m 40s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            id: 'c102_m2_l2',
+            title: 'Profiling Components & Avoiding Memoization Traps',
+            duration: '28m 40s',
+            videoId: '30LWjhZzg50',
+            summary: 'When useMemo and useCallback hurt performance, and how to structure pure subtrees.',
           },
           {
-            id: 'les_102_2_3',
-            title: 'Custom Hook Abstractions & Memory Management',
-            duration: '17m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-          },
-          {
-            id: 'les_102_2_4',
-            title: 'Refs, Imperative Handles & DOM Mutations',
-            duration: '12m 20s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+            id: 'c102_m2_l3',
+            title: 'Concurrent Transitions & useDeferredValue',
+            duration: '19m 50s',
+            videoId: '30LWjhZzg50',
+            summary: 'Keeping input sliders and search responsive while heavy data recalculates.',
           },
         ],
       },
       {
-        id: 'mod_102_3',
-        title: 'Scalable State Management & Context',
-        description: 'Context slicing, atomic state stores, and persistence middleware.',
-        duration: '3h 50m',
+        id: 'c102_m3',
+        title: 'Enterprise State Management & Architecture',
+        summary: 'State machines, context splitting, Zustand/Jotai patterns, and server caching with React Query.',
         lessons: [
           {
-            id: 'les_102_3_1',
-            title: 'Preventing Context Re-render Cascades',
-            duration: '16m 00s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreet.mp4',
+            id: 'c102_m3_l1',
+            title: 'Context Splitting & Custom Provider Wrappers',
+            duration: '21m 20s',
+            videoId: '30LWjhZzg50',
+            summary: 'Preventing root re-renders by isolating dispatch actions from state subscriptions.',
           },
           {
-            id: 'les_102_3_2',
-            title: 'Atomic State Engine vs Global Reducers',
-            duration: '18m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            id: 'c102_m3_l2',
+            title: 'Deterministic State Machines with XState',
+            duration: '27m 15s',
+            videoId: '30LWjhZzg50',
+            summary: 'Modeling complex multi-step checkout and onboarding flows safely.',
           },
           {
-            id: 'les_102_3_3',
-            title: 'Robust LocalStorage Persistence & Sync Hooks',
-            duration: '14m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+            id: 'c102_m3_l3',
+            title: 'Optimistic UI Updates & Cache Invalidation',
+            duration: '23m 05s',
+            videoId: '30LWjhZzg50',
+            summary: 'Instant local updates with automatic rollback on network failure.',
           },
         ],
       },
       {
-        id: 'mod_102_4',
-        title: 'Production Resilience & Testing',
-        description: 'Error Boundaries, fallback UI, code splitting, dynamic imports, and memory profiling.',
-        duration: '4h 40m',
+        id: 'c102_m4',
+        title: 'Testing, Error Boundaries & Production Resilience',
+        summary: 'Unit testing with Vitest, Integration with React Testing Library, and runtime crash isolation.',
         lessons: [
           {
-            id: 'les_102_4_1',
-            title: 'Designing Resilient Error Boundary Fallbacks',
-            duration: '15m 50s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+            id: 'c102_m4_l1',
+            title: 'Writing Resilient Component Integration Tests',
+            duration: '25m 40s',
+            videoId: '30LWjhZzg50',
+            summary: 'Testing user behavior rather than implementation details with screen queries.',
           },
           {
-            id: 'les_102_4_2',
-            title: 'Bundle Splitting & Lazy Route Loading',
-            duration: '17m 45s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            id: 'c102_m4_l2',
+            title: 'Granular React Error Boundaries & Fallback States',
+            duration: '17m 30s',
+            videoId: '30LWjhZzg50',
+            summary: 'Preventing single-component failures from collapsing the entire application window.',
           },
           {
-            id: 'les_102_4_3',
-            title: 'Memory Leak Auditing with Chrome DevTools',
-            duration: '21m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-          },
-          {
-            id: 'les_102_4_4',
-            title: 'Integration Testing React Component Trees',
-            duration: '18m 05s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            id: 'c102_m4_l3',
+            title: 'CI/CD Pipelines, Linting & Bundle Size Budgets',
+            duration: '20m 10s',
+            videoId: '30LWjhZzg50',
+            summary: 'Automating bundle analyzer checks and PR quality gates in GitHub Actions.',
           },
         ],
       },
     ],
   },
-
   c_103: {
     id: 'c_103',
     title: 'AI Engineering & LLM Integration',
-    description: 'Build RAG pipelines, vector embedding indexing, tool calling agents, and production guardrails.',
-    longDescription:
-      'An in-depth guide to help you master AI engineering and production LLM integration. Learn how to design robust Retrieval-Augmented Generation (RAG) pipelines, construct vector database indexes, orchestrate autonomous tool-calling agents, enforce safety guardrails, and evaluate LLM responses.',
-    category: 'AI / Machine Learning',
+    headline: 'Explore prompt engineering, RAG, and multi-agent systems.',
+    description:
+      'A cutting-edge masterclass in modern generative AI and applied LLM architecture. Learn to build context-aware Retrieval-Augmented Generation (RAG) pipelines, implement vector similarity search, manage prompt orchestration, and construct autonomous multi-agent workflows.',
     instructor: 'Dr. Sarah Connor',
-    instructorRole: 'Lead AI Research Engineer',
+    instructorRole: 'Head of AI Research',
     instructorAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    duration: '18h 40m',
+    duration: '18 hrs',
     totalModules: 4,
-    totalLessons: 16,
-    rating: 4.98,
+    totalLessons: 12,
+    rating: 4.88,
     level: 'Advanced',
     access: 'Free',
     language: 'English (EN)',
+    category: 'Artificial Intelligence',
+    defaultVideoId: 'p3sij8QzONQ',
     thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=80',
     accentColor: '#10B981',
     modules: [
       {
-        id: 'mod_103_1',
-        title: 'Prompt Engineering & Vector Embeddings',
-        description: 'System prompts, zero-shot/few-shot techniques, embedding models, and distance metrics.',
-        duration: '4h 30m',
+        id: 'c103_m1',
+        title: 'Transformer Mechanics & LLM Fundamentals',
+        summary: 'Self-attention, positional encodings, tokenization pipelines, and model parameter scaling.',
         lessons: [
           {
-            id: 'les_103_1_1',
-            title: 'System Prompt Crafting & Constraint Enforcement',
-            duration: '12m 40s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            completed: true,
+            id: 'c103_m1_l1',
+            title: 'Self-Attention Mechanisms & Token Embeddings',
+            duration: '22m 10s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'How transformers process language context concurrently using query, key, and value matrices.',
             missionId: 'rag',
           },
           {
-            id: 'les_103_1_2',
-            title: 'High-Dimensional Vector Embeddings & Math Primitives',
-            duration: '18m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            id: 'c103_m1_l2',
+            title: 'Tokenization Limits & Context Window Budgets',
+            duration: '19m 35s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Byte-pair encoding (BPE), chunking strategies, and token cost economics.',
           },
           {
-            id: 'les_103_1_3',
-            title: 'Cosine Similarity vs Euclidean & Dot Product Metrics',
-            duration: '15m 50s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-          },
-          {
-            id: 'les_103_1_4',
-            title: 'Vector Database Indexing (HNSW & IVF)',
-            duration: '21m 00s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            id: 'c103_m1_l3',
+            title: 'Decoding Strategies: Temperature, Top-p & Penalties',
+            duration: '24m 15s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Controlling creativity vs. deterministic response generation in production systems.',
           },
         ],
       },
       {
-        id: 'mod_103_2',
-        title: 'Retrieval-Augmented Generation (RAG)',
-        description: 'Document chunking strategies, hybrid search, re-ranking, and context compression.',
-        duration: '4h 50m',
+        id: 'c103_m2',
+        title: 'Retrieval-Augmented Generation (RAG) Pipelines',
+        summary: 'Vector databases, dense retrieval embeddings, semantic chunking, and metadata filtering.',
         lessons: [
           {
-            id: 'les_103_2_1',
-            title: 'Semantic Document Chunking & Overlap Windows',
-            duration: '16m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            id: 'c103_m2_l1',
+            title: 'Vector Embeddings & Cosine Similarity Spaces',
+            duration: '27m 40s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Transforming unstructured enterprise text into mathematical vectors for nearest-neighbor search.',
           },
           {
-            id: 'les_103_2_2',
-            title: 'Hybrid BM25 + Vector Search Pipelines',
+            id: 'c103_m2_l2',
+            title: 'Document Ingestion, Chunking & Chunk Overlap',
+            duration: '23m 15s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Preserving semantic continuity and boundary integrity across large PDFs and docs.',
+          },
+          {
+            id: 'c103_m2_l3',
+            title: 'Hybrid Search: Combining BM25 with Vector Retrieval',
+            duration: '26m 50s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Solving exact-match keyword failures by blending sparse and dense ranking algorithms.',
+          },
+        ],
+      },
+      {
+        id: 'c103_m3',
+        title: 'Prompt Orchestration & Structured Outputs',
+        summary: 'Few-shot patterns, chain-of-thought, function calling, and strict JSON Schema validation.',
+        lessons: [
+          {
+            id: 'c103_m3_l1',
+            title: 'Chain-of-Thought & ReAct Prompt Architectures',
+            duration: '21m 30s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Teaching models to reason step-by-step before executing downstream actions.',
+          },
+          {
+            id: 'c103_m3_l2',
+            title: 'Function Calling & Tool Execution Protocols',
+            duration: '29m 10s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Enabling LLMs to trigger external SQL queries, APIs, and calculators deterministically.',
+          },
+          {
+            id: 'c103_m3_l3',
+            title: 'Structured Output Enforcement with Zod Schemas',
+            duration: '18m 45s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Guaranteeing zero hallucinated keys in downstream application code.',
+          },
+        ],
+      },
+      {
+        id: 'c103_m4',
+        title: 'Autonomous Multi-Agent Systems & Evaluation',
+        summary: 'Agent supervisors, state graphs, evaluation benchmarks (RAGAS), and hallucination guardrails.',
+        lessons: [
+          {
+            id: 'c103_m4_l1',
+            title: 'Multi-Agent Supervision & Task Delegation',
+            duration: '31m 20s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Building networks of specialized agents that critique and refine each other’s output.',
+          },
+          {
+            id: 'c103_m4_l2',
+            title: 'RAG Evaluation Frameworks: Faithfulness & Relevancy',
+            duration: '24m 50s',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Benchmarking factual grounding and detecting context drift automatically.',
+          },
+          {
+            id: 'c103_m4_l3',
+            title: 'Security: Prompt Injections & PII Scrubbing',
             duration: '20m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-          },
-          {
-            id: 'les_103_2_3',
-            title: 'Cross-Encoder Re-Ranking & Context Compression',
-            duration: '19m 40s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-          },
-          {
-            id: 'les_103_2_4',
-            title: 'Mitigating Context Window Lost-In-The-Middle Syndrome',
-            duration: '14m 25s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-          },
-        ],
-      },
-      {
-        id: 'mod_103_3',
-        title: 'Agentic Workflows & Tool Calling',
-        description: 'Tool schema definition, execution loop state machines, and structured output parsing.',
-        duration: '4h 40m',
-        lessons: [
-          {
-            id: 'les_103_3_1',
-            title: 'JSON Schema Definitions for Function Calling',
-            duration: '15m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreet.mp4',
-          },
-          {
-            id: 'les_103_3_2',
-            title: 'ReAct Agent Loops & Tool Execution Drivers',
-            duration: '22m 30s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-          },
-          {
-            id: 'les_103_3_3',
-            title: 'Error Recovery & Fallback Tool Delegation',
-            duration: '17m 45s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-          },
-          {
-            id: 'les_103_3_4',
-            title: 'Structured Output Validation with Zod & Pydantic',
-            duration: '16m 20s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
-          },
-        ],
-      },
-      {
-        id: 'mod_103_4',
-        title: 'Production LLM Evaluation & Guardrails',
-        description: 'Hallucination scoring, streaming token response handling, and moderation APIs.',
-        duration: '4h 40m',
-        lessons: [
-          {
-            id: 'les_103_4_1',
-            title: 'Hallucination Detection & Faithfulness Metrics',
-            duration: '18m 10s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-          },
-          {
-            id: 'les_103_4_2',
-            title: 'Server-Sent Events (SSE) & Token Streaming UI',
-            duration: '16m 50s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-          },
-          {
-            id: 'les_103_4_3',
-            title: 'Input Prompt Injection Safeguards & Moderation',
-            duration: '19m 15s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-          },
-          {
-            id: 'les_103_4_4',
-            title: 'Cost Tracking, Token Budgeting & Caching Strategies',
-            duration: '15m 05s',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            videoId: 'p3sij8QzONQ',
+            summary: 'Hardening enterprise LLM gateways against adversarial attacks and data leaks.',
           },
         ],
       },
@@ -490,6 +452,9 @@ export const DETAILED_COURSES: Record<string, DetailedCourse> = {
   },
 };
 
-export const getDetailedCourse = (courseId: string): DetailedCourse | undefined => {
-  return DETAILED_COURSES[courseId];
-};
+export const DETAILED_COURSES = detailedCourses;
+
+export function getDetailedCourse(courseId: string | undefined): DetailedCourse | undefined {
+  if (!courseId) return undefined;
+  return detailedCourses[courseId];
+}
