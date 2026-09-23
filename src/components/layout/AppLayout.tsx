@@ -17,8 +17,6 @@ import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';
 import { mockUser } from '../../mock/data';
 import { CommandPalette } from '../common/CommandPalette';
-import { NextActionPill } from '../common/NextActionPill';
-import { NovaAiCopilot } from '../common/NovaAiCopilot';
 
 const NAV_ITEMS = [
   { path: '/today', label: 'Today', icon: Sparkles },
@@ -64,8 +62,8 @@ export const AppLayout: React.FC = () => {
     <div className="min-h-screen bg-nova-bg dark:bg-slate-950 text-nova-charcoal dark:text-slate-100 flex flex-col font-sans selection:bg-nova-lavender pb-20 md:pb-0 transition-colors duration-300">
       {/* Top Header Bar */}
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200/80 dark:border-slate-800 px-4 md:px-8 h-16 flex items-center justify-between shadow-xs">
-        {/* Left: Brand Logo & Goal Badge & Next Action Telemetry */}
-        <div className="flex items-center gap-3">
+        {/* Left: Brand Logo & Goal Badge */}
+        <div className="flex items-center gap-4">
           <Link
             to="/today"
             aria-label="NOVA Learning Home"
@@ -84,10 +82,6 @@ export const AppLayout: React.FC = () => {
             <Badge variant="lavender" className="text-xs font-semibold py-1 px-3">
               Goal: {targetGoal}
             </Badge>
-          </div>
-
-          <div className="hidden xl:block">
-            <NextActionPill />
           </div>
         </div>
 
@@ -216,10 +210,8 @@ export const AppLayout: React.FC = () => {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />
-
-      {/* Persistent Socratic AI Copilot (⌘J / Ctrl+J) */}
-      <NovaAiCopilot />
     </div>
   );
 };
+
 
