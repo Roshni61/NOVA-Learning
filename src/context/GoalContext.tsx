@@ -30,6 +30,8 @@ export interface GoalState {
   achievements: Achievement[];
   skillRadar: SkillRadarItem[];
   pathMilestones: PathMilestone[];
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
   setGoal: (goal: string) => void;
   setTimeline: (months: number, hours: number) => void;
   updateGoalData: (data: Partial<GoalState>) => void;
@@ -305,6 +307,24 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPathMilestones(computeMilestoneProgression(INITIAL_MILESTONES, concepts, missions));
   }, [concepts, missions]);
 
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('nova_theme');
+    return saved === 'dark' ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('nova_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   const setGoal = (goal: string) => setTargetGoal(goal);
   const setTimeline = (months: number, hours: number) => {
     setMonthsToTarget(months);
@@ -423,6 +443,8 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         achievements,
         skillRadar,
         pathMilestones,
+        theme,
+        toggleTheme,
         setGoal,
         setTimeline,
         updateGoalData,
