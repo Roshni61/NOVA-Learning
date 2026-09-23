@@ -40,14 +40,14 @@ export const CatalogPage: React.FC = () => {
         const matchesQuery =
           query === '' ||
           course.title.toLowerCase().includes(query) ||
-          course.description.toLowerCase().includes(query) ||
-          course.instructor.toLowerCase().includes(query) ||
+          (course.description || '').toLowerCase().includes(query) ||
+          (course.instructor || '').toLowerCase().includes(query) ||
           course.category.toLowerCase().includes(query);
 
         return matchesCategory && matchesQuery;
       })
       .sort((a, b) => {
-        if (sortBy === 'rating') return b.rating - a.rating;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
         if (sortBy === 'lessons') return b.lessonsCount - a.lessonsCount;
         return a.title.localeCompare(b.title);
       });

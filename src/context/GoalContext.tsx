@@ -358,7 +358,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...c,
             mastery: newMastery,
             status: newStatus,
-            accuracy: Math.min(100, c.accuracy + 5),
+            accuracy: Math.min(100, (c.accuracy ?? 85) + 5),
             lastPracticed: 'Just now',
           };
         }

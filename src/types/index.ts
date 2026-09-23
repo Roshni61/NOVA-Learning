@@ -13,14 +13,14 @@ export interface User {
 export interface Course {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   category: string;
-  instructor: string;
-  duration: string;
+  instructor?: string;
+  duration?: string;
   lessonsCount: number;
-  rating: number;
+  rating?: number;
   progress?: number;
-  thumbnail: string;
+  thumbnail?: string;
   accentColor?: string;
 }
 
@@ -58,8 +58,8 @@ export interface ConceptNodeData {
   unlocks: string[]; // concept IDs
   weakPoints: string[];
   lastPracticed: string;
-  accuracy: number;
-  importance: 'high' | 'medium' | 'normal';
+  accuracy?: number;
+  importance?: 'high' | 'medium' | 'normal';
   position?: { x: number; y: number };
 }
 
@@ -75,22 +75,22 @@ export interface ConceptEdge {
 
 export interface Mission {
   id: string;
-  conceptId: string;
-  conceptName: string;
+  conceptId?: string;
+  conceptName?: string;
   title: string;
-  description: string;
-  reason: string;
-  duration: string;
+  description?: string;
+  reason?: string;
+  duration?: string;
   stage: 'Learn' | 'Practice' | 'Apply' | 'Prove';
   completed: boolean;
-  accent: 'lavender' | 'coral' | 'mint' | 'yellow';
+  accent?: 'lavender' | 'coral' | 'mint' | 'yellow';
 }
 
 export interface Achievement {
   id: string;
   title: string;
-  description: string;
-  icon: string;
+  description?: string;
+  icon?: string;
   unlocked: boolean;
   unlockedAt?: string;
 }
@@ -107,19 +107,19 @@ export interface MissionDetail {
   conceptName: string;
   title: string;
   category: 'FOUNDATIONS' | 'MATHEMATICS' | 'MACHINE LEARNING' | 'DEEP LEARNING' | 'AI SYSTEMS' | 'ENGINEERING';
-  duration: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  stage: 'Learn' | 'Practice' | 'Apply' | 'Prove';
-  description: string;
-  learningObjective: string;
-  aiIntent: string;
+  duration?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+  stage?: 'Learn' | 'Practice' | 'Apply' | 'Prove';
+  description?: string;
+  learningObjective?: string;
+  aiIntent?: string;
   learnContent: {
     part1Title: string;
     part1Text: string;
     part2Title: string;
     part2Text: string;
     codeSnippet?: string;
-    diagramType: 'neuralnet' | 'backprop' | 'gradient' | 'matrix' | 'hashmap' | 'code';
+    diagramType?: 'neuralnet' | 'backprop' | 'gradient' | 'matrix' | 'hashmap' | 'code';
   };
   applyContent: {
     taskTitle: string;
@@ -140,10 +140,17 @@ export interface PathMilestone {
   masteryRequirement: number;
   currentMastery: number;
   progress: number;
-  estimatedDuration: string;
+  estimatedDuration?: string;
   unlockConditions: string[];
   status: 'Completed' | 'Active' | 'Unlocked' | 'Locked';
   reason?: string;
   unlockedProjects?: string[];
 }
 
+export interface QuizState {
+  status: 'idle' | 'in-progress' | 'evaluating' | 'completed';
+  currentIndex: number;
+  selectedOption: number | null;
+  userAnswers: number[];
+  isAnswerLocked?: boolean;
+}

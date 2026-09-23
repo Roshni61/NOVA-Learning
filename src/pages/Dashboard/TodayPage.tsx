@@ -24,10 +24,10 @@ interface Mission {
   conceptId?: string;
   stage: 'Learn' | 'Practice' | 'Apply' | 'Prove';
   title: string;
-  description: string;
-  duration: string;
+  description?: string;
+  duration?: string;
   completed: boolean;
-  accent: 'lavender' | 'coral' | 'mint' | 'yellow';
+  accent?: 'lavender' | 'coral' | 'mint' | 'yellow';
 }
 
 export const TodayPage: React.FC = () => {
