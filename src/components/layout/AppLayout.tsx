@@ -9,6 +9,9 @@ import {
   User as UserIcon,
   Search,
   Flame,
+  Sun,
+  Moon,
+  BookOpen,
 } from 'lucide-react';
 import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';
@@ -17,6 +20,7 @@ import { GlobalSearchModal } from './GlobalSearchModal';
 
 const NAV_ITEMS = [
   { path: '/today', label: 'Today', icon: Sparkles },
+  { path: '/catalog', label: 'Catalog', icon: BookOpen },
   { path: '/universe', label: 'My Universe', icon: Network },
   { path: '/path', label: 'Path', icon: GitCommit },
   { path: '/tutor', label: 'Tutor', icon: MessageSquareCode },
@@ -25,20 +29,24 @@ const NAV_ITEMS = [
 
 export const AppLayout: React.FC = () => {
   const location = useLocation();
-  const { targetGoal, streak } = useGoal();
+  const { targetGoal, streak, theme, toggleTheme } = useGoal();
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
   return (
-    <div className="min-h-screen bg-nova-bg text-nova-charcoal flex flex-col font-sans selection:bg-nova-lavender pb-20 md:pb-0">
+    <div className="min-h-screen bg-nova-bg dark:bg-slate-950 text-nova-charcoal dark:text-slate-100 flex flex-col font-sans selection:bg-nova-lavender pb-20 md:pb-0 transition-colors duration-300">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-gray-200/60 px-4 md:px-8 h-16 flex items-center justify-between shadow-xs">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200/80 dark:border-slate-800 px-4 md:px-8 h-16 flex items-center justify-between shadow-xs">
         {/* Left: Brand Logo & Goal Badge */}
         <div className="flex items-center gap-4">
-          <Link to="/today" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-xl bg-nova-charcoal flex items-center justify-center text-nova-coral font-black text-sm transition-transform group-hover:scale-105">
+          <Link
+            to="/today"
+            aria-label="NOVA Learning Home"
+            className="flex items-center gap-2 group min-h-[44px] min-w-[44px] cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-xl bg-nova-charcoal dark:bg-slate-100 text-nova-coral dark:text-slate-900 flex items-center justify-center font-black text-sm transition-transform group-hover:scale-105">
               N
             </div>
-            <span className="text-lg font-black text-nova-charcoal tracking-tight flex items-center gap-1">
+            <span className="text-lg font-black text-nova-charcoal dark:text-slate-100 tracking-tight flex items-center gap-1">
               NOVA
               <span className="w-2 h-2 rounded-full bg-nova-coral inline-block" />
             </span>
@@ -52,68 +60,82 @@ export const AppLayout: React.FC = () => {
         </div>
 
         {/* Center: Desktop Navigation Bar */}
-        <nav className="hidden md:flex items-center gap-1 bg-nova-bg/90 p-1 rounded-2xl border border-gray-200/80 shadow-inner">
+        <nav
+          aria-label="Main navigation"
+          className="hidden md:flex items-center gap-1 bg-nova-bg/90 dark:bg-slate-800/80 p-1 rounded-2xl border border-gray-200/80 dark:border-slate-700 shadow-inner"
+        >
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
+                aria-label={`Navigate to ${item.label}`}
                 className={({ isActive }) =>
-                  `px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 min-h-[44px] ${
                     isActive
-                      ? 'bg-white text-nova-charcoal shadow-sm border border-gray-100'
-                      : 'text-nova-muted hover:text-nova-charcoal hover:bg-white/50'
+                      ? 'bg-white dark:bg-slate-900 text-nova-charcoal dark:text-white shadow-sm border border-gray-100 dark:border-slate-800'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-nova-charcoal dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                   }`
                 }
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span>{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        {/* Right: Search & Profile Avatar */}
-        <div className="flex items-center gap-3">
-          {/* Quick Search */}
-          <div
+        {/* Right: Search, Theme Toggle & Profile Avatar */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Search Trigger */}
+          <button
             onClick={() => setIsSearchOpen(true)}
-            className="relative hidden lg:flex items-center w-64 cursor-pointer"
+            aria-label="Open search modal (Command K)"
+            className="relative hidden lg:flex items-center w-60 h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-nova-bg dark:bg-slate-800 text-xs cursor-pointer focus:outline-none text-left font-medium min-h-[44px]"
           >
-            <Search className="w-4 h-4 text-gray-400 absolute left-3" />
-            <input
-              type="text"
-              readOnly
-              placeholder="Search concepts, nodes, or ask AI..."
-              className="w-full pl-9 pr-12 py-1.5 rounded-xl border border-gray-200 bg-nova-bg text-xs cursor-pointer focus:outline-none font-medium"
-            />
-            <span className="text-[9px] font-black text-nova-muted bg-white border border-gray-200 px-1.5 py-0.5 rounded absolute right-2">
+            <Search className="w-4 h-4 text-gray-400 dark:text-slate-400 mr-2 flex-shrink-0" />
+            <span className="text-slate-500 dark:text-slate-300 truncate">Search concepts, nodes, or AI...</span>
+            <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 px-1.5 py-0.5 rounded ml-auto">
               ⌘K
             </span>
-          </div>
+          </button>
+
+          {/* Theme Toggle Button (WCAG AA Accessible 44x44px Target) */}
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode theme' : 'Switch to dark mode theme'}
+            className="w-11 h-11 rounded-2xl bg-nova-bg dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all hover:scale-105 min-h-[44px] min-w-[44px] cursor-pointer"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-purple-600" />
+            )}
+          </button>
 
           {/* Profile Level & Avatar */}
           <Link
             to="/profile"
-            className="flex items-center gap-2.5 bg-nova-bg hover:bg-purple-50 px-3 py-1.5 rounded-2xl border border-gray-200 cursor-pointer transition-all hover:scale-105"
+            aria-label="View user profile"
+            className="flex items-center gap-2.5 bg-nova-bg dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-slate-700 px-3 py-1.5 rounded-2xl border border-gray-200 dark:border-slate-700 cursor-pointer transition-all hover:scale-105 min-h-[44px]"
           >
-            <div className="flex items-center gap-1 text-xs font-bold text-nova-charcoal">
+            <div className="flex items-center gap-1 text-xs font-bold text-nova-charcoal dark:text-slate-100">
               <Flame className="w-4 h-4 text-nova-coral fill-nova-coral" />
-              <span>Level 4</span>
-              <span className="text-nova-muted text-[10px]">• {streak} Days</span>
+              <span className="hidden sm:inline">Level 4</span>
+              <span className="text-slate-500 dark:text-slate-300 text-[10px]">• {streak}D</span>
             </div>
 
             <img
               src={mockUser.avatarUrl}
-              alt={mockUser.name}
-              className="w-7 h-7 rounded-full object-cover border border-gray-300"
+              alt={`Avatar of ${mockUser.name}`}
+              className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-slate-600"
             />
           </Link>
         </div>
       </header>
 
-      {/* Main Content Area with Animated Page Transition */}
+      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
         <AnimatePresence mode="wait">
           <motion.div
@@ -128,17 +150,23 @@ export const AppLayout: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      {/* Mobile Navigation Bottom Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200 px-4 py-2 flex items-center justify-around shadow-2xl">
+      {/* Mobile Navigation Bottom Bar (<768px) with 44x44px Touch Targets */}
+      <nav
+        aria-label="Mobile bottom navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-slate-800 px-4 py-1.5 flex items-center justify-around shadow-2xl"
+      >
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.path}
               to={item.path}
+              aria-label={`Navigate to ${item.label}`}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
-                  isActive ? 'text-nova-coral font-bold scale-105' : 'text-nova-muted font-medium'
+                `flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] px-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'text-nova-coral font-bold scale-105'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-nova-charcoal font-medium'
                 }`
               }
             >
@@ -147,8 +175,9 @@ export const AppLayout: React.FC = () => {
             </NavLink>
           );
         })}
-      </div>
-      {/* Global AI Command Modal */}
+      </nav>
+
+      {/* Global AI Search Modal */}
       <GlobalSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -156,3 +185,4 @@ export const AppLayout: React.FC = () => {
     </div>
   );
 };
+

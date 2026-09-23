@@ -5,6 +5,7 @@ import { HomePage } from './pages/Home';
 import { LoginPage, OnboardingPage } from './pages/Auth';
 import { AppLayout } from './components/layout';
 import { TodayPage, UniversePage, PathPage, TutorPage, ProfilePage, MissionWorkspacePage } from './pages/Dashboard';
+import { CatalogPage } from './pages/Catalog';
 
 export const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
           {/* Protected App Layout Shell */}
           <Route element={<AppLayout />}>
             <Route path="/today" element={<TodayPage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/universe" element={<UniversePage />} />
             <Route path="/path" element={<PathPage />} />
             <Route path="/tutor" element={<TutorPage />} />

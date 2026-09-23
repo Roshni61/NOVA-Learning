@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -16,22 +16,46 @@ import {
   ShieldCheck,
   Target,
   Lock,
+  ListVideo,
 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
 import { generateMissionQuestions, type GeneratedQuestion } from '../../lib/gemini';
 import { getMissionDetail } from '../../data/missionRegistry';
+import { VideoPlayer, CurriculumDrawer, type CurriculumModule, type LessonItem } from '../../components/lms';
+
+const DEMO_CURRICULUM_MODULES: CurriculumModule[] = [
+  {
+    id: 'm_foundations',
+    title: 'Module 1: Mathematical & Algorithmic Intuition',
+    lessons: [
+      { id: 'backpropagation-computational-graphs', title: '1. Computational Graph & Reverse Sweep', duration: '12:45', completed: true, type: 'video' },
+      { id: 'matrix-calculus-gradient-descent', title: '2. Jacobian Matrices & Weight Gradients', duration: '15:20', completed: false, type: 'exercise' },
+      { id: 'numpy-loss-function', title: '3. Vectorized Categorical Cross Entropy', duration: '20:15', completed: false, type: 'video' },
+    ],
+  },
+  {
+    id: 'm_advanced',
+    title: 'Module 2: Autograd & Deep Learning Architectures',
+    lessons: [
+      { id: 'transformers', title: '4. Scaled Dot-Product Self-Attention', duration: '25:00', completed: false, type: 'video' },
+      { id: 'rag', title: '5. Vector Similarity Search & RAG Engines', duration: '30:10', completed: false, type: 'exercise' },
+    ],
+  },
+];
 
 export const MissionWorkspacePage: React.FC = () => {
   const { conceptId } = useParams<{ conceptId: string }>();
   const navigate = useNavigate();
   const { completeMission } = useGoal();
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Dynamically resolve mission data based on route identifier (NO hardcoded HashMap fallback!)
+  // Dynamically resolve mission data based on route identifier
   const missionData = getMissionDetail(conceptId);
 
   const [activeStage, setActiveStage] = useState<'Learn' | 'Practice' | 'Apply' | 'Prove'>('Learn');
   const [learnStep, setLearnStep] = useState<number>(0);
+  const [isCurriculumOpen, setIsCurriculumOpen] = useState<boolean>(false);
 
   // Practice Stage State
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
@@ -69,7 +93,7 @@ export const MissionWorkspacePage: React.FC = () => {
     setIsProveUnlocked(false);
   }, [conceptId, missionData.id]);
 
-  // Load 10 API questions dynamically for the current mission context
+  // Load API questions dynamically
   useEffect(() => {
     async function loadQuestions() {
       setIsLoadingQuestions(true);
@@ -112,7 +136,6 @@ export const MissionWorkspacePage: React.FC = () => {
       setIsAnswerSubmitted(false);
       setShowHint(false);
     } else {
-      // Completed all 10 questions -> Unlock Apply Stage (75%)
       setIsApplyUnlocked(true);
       setActiveStage('Apply');
     }
@@ -138,25 +161,33 @@ export const MissionWorkspacePage: React.FC = () => {
     completeMission(missionData.id, finalScorePct);
   };
 
+  const handleSelectLesson = (lesson: LessonItem) => {
+    navigate(`/mission/${lesson.id}`);
+  };
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-10">
-      {/* Header Bar */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-nova-soft space-y-4">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12 font-sans">
+      {/* Top Header Bar */}
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-nova-soft space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <Link to="/today" className="inline-flex items-center text-xs font-bold text-nova-muted hover:text-nova-charcoal gap-1">
+            <Link
+              to="/today"
+              aria-label="Return to Today dashboard"
+              className="inline-flex items-center text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-nova-charcoal dark:hover:text-white gap-1 min-h-[44px]"
+            >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Today
             </Link>
-            <h1 className="text-2xl font-black text-nova-charcoal">
+            <h1 className="text-2xl font-black text-nova-charcoal dark:text-slate-100">
               Mission: {missionData.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-nova-muted">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
               <span className="flex items-center gap-1 font-semibold">
                 <Clock className="w-3.5 h-3.5 text-nova-coral" /> {missionData.duration}
               </span>
               <span>•</span>
-              <span className="flex items-center gap-1 font-semibold text-nova-charcoal">
-                <Target className="w-3.5 h-3.5 text-purple-600" /> {missionData.conceptName}
+              <span className="flex items-center gap-1 font-semibold text-nova-charcoal dark:text-slate-200">
+                <Target className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> {missionData.conceptName}
               </span>
               <span>•</span>
               <Badge variant="coral" className="text-[10px]">
@@ -165,24 +196,36 @@ export const MissionWorkspacePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full md:w-64 space-y-1.5">
-            <div className="flex justify-between text-xs font-bold">
-              <span className="text-nova-muted">Mission Progress</span>
-              <span className="text-nova-coral">{calculateProgress()}%</span>
-            </div>
-            <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: '25%' }}
-                animate={{ width: `${calculateProgress()}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="bg-gradient-to-r from-nova-coral via-nova-lavender to-nova-mint h-full rounded-full"
-              />
+          <div className="flex items-center gap-3">
+            {/* Mobile Curriculum Drawer Trigger Button (<768px) with 44x44px Touch Target */}
+            <button
+              onClick={() => setIsCurriculumOpen(true)}
+              aria-label="Toggle curriculum syllabus drawer"
+              className="md:hidden px-4 py-2.5 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-900 dark:text-purple-200 text-xs font-bold flex items-center gap-2 border border-purple-200 dark:border-purple-800 min-h-[44px] min-w-[44px] cursor-pointer"
+            >
+              <ListVideo className="w-4 h-4 text-purple-600" />
+              <span>Syllabus</span>
+            </button>
+
+            <div className="w-full md:w-60 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-slate-600 dark:text-slate-300">Mission Progress</span>
+                <span className="text-nova-coral">{calculateProgress()}%</span>
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: '25%' }}
+                  animate={{ width: `${calculateProgress()}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="bg-gradient-to-r from-nova-coral via-nova-lavender to-nova-mint h-full rounded-full"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Stage Navigation Tabs */}
-        <div className="flex items-center gap-2 border-t border-gray-100 pt-4 overflow-x-auto">
+        {/* Stage Navigation Tabs with 44x44px Touch Targets */}
+        <div className="flex items-center gap-2 border-t border-gray-100 dark:border-slate-800 pt-4 overflow-x-auto">
           {(['Learn', 'Practice', 'Apply', 'Prove'] as const).map((stage) => {
             const isUnlocked =
               stage === 'Learn' ||
@@ -195,12 +238,15 @@ export const MissionWorkspacePage: React.FC = () => {
                 key={stage}
                 disabled={!isUnlocked}
                 onClick={() => setActiveStage(stage)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs transition-all whitespace-nowrap ${
+                aria-label={`Switch to ${stage} stage (${
+                  stage === 'Learn' ? '25%' : stage === 'Practice' ? '50%' : stage === 'Apply' ? '75%' : '100%'
+                } progress). ${isUnlocked ? 'Unlocked' : 'Locked'}`}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap min-h-[44px] ${
                   activeStage === stage
-                    ? 'bg-nova-charcoal text-white shadow-md'
+                    ? 'bg-nova-charcoal dark:bg-slate-100 text-white dark:text-nova-charcoal shadow-md'
                     : isUnlocked
-                    ? 'bg-gray-50 text-nova-charcoal hover:bg-gray-100'
-                    : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
+                    ? 'bg-nova-bg dark:bg-slate-800 text-nova-charcoal dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer'
+                    : 'bg-gray-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
                 }`}
               >
                 {!isUnlocked && <Lock className="w-3 h-3" />}
@@ -212,516 +258,367 @@ export const MissionWorkspacePage: React.FC = () => {
             );
           })}
         </div>
+      </div>
 
-        {/* Intelligence Context Banner */}
-        <div className="bg-gradient-to-br from-rose-50 via-purple-50 to-emerald-50 p-4 rounded-2xl border border-purple-100 flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-nova-coral flex-shrink-0 mt-0.5" />
-          <div className="text-xs space-y-0.5">
-            <span className="font-black text-nova-charcoal uppercase tracking-wider block">
-              AI LEARNING INTENT
-            </span>
-            <p className="text-nova-muted leading-relaxed font-medium">
-              "{missionData.aiIntent}"
-            </p>
+      {/* Main Grid: Left Content Viewport (7/12) & Right Desktop Curriculum Drawer (5/12) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        {/* Main Content Viewport (Scrolled into view automatically on lesson selection) */}
+        <div ref={contentRef} className="md:col-span-7 space-y-6 scroll-mt-24">
+          {/* STAGE 1: LEARN (Conceptual Understanding & Video Player) */}
+          {activeStage === 'Learn' && (
+            <Card className="bg-white dark:bg-slate-900 p-6 md:p-8 border border-gray-100 dark:border-slate-800 space-y-6 rounded-3xl shadow-nova-soft">
+              <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Badge variant="mint" className="gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5" /> Stage 1: Learn (25% Progress)
+                  </Badge>
+                </div>
+                <span className="text-xs font-bold text-nova-charcoal dark:text-slate-100">Step {learnStep + 1} of 2</span>
+              </div>
+
+              {/* Responsive Video Player Component (aspect-video container) */}
+              <VideoPlayer
+                title={missionData.title}
+                duration={missionData.duration}
+                onEnded={() => setLearnStep(1)}
+              />
+
+              {learnStep === 0 ? (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-xl font-black text-nova-charcoal dark:text-slate-100">
+                      {missionData.learnContent.part1Title}
+                    </h2>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                      {missionData.learnContent.part1Text}
+                    </p>
+                  </div>
+
+                  <div className="bg-purple-50/80 dark:bg-purple-950/50 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/60 space-y-1.5 text-xs text-purple-950 dark:text-purple-200">
+                    <span className="font-extrabold uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      Intuition & Core Principle
+                    </span>
+                    <p className="leading-relaxed font-medium">
+                      {missionData.learningObjective}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      variant="coral"
+                      size="md"
+                      onClick={() => setLearnStep(1)}
+                      aria-label="Advance to formulation and code example"
+                      className="min-h-[44px] gap-2"
+                    >
+                      <span>Next: Formulation & Code Example</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-xl font-black text-nova-charcoal dark:text-slate-100">
+                      {missionData.learnContent.part2Title}
+                    </h2>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                      {missionData.learnContent.part2Text}
+                    </p>
+                  </div>
+
+                  {missionData.learnContent.codeSnippet && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-nova-charcoal dark:text-slate-200 uppercase tracking-wider">
+                        Code Formulation Snippet:
+                      </span>
+                      <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-purple-300 space-y-1 overflow-x-auto">
+                        <pre>{missionData.learnContent.codeSnippet}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-slate-800">
+                    <Button
+                      variant="ghost"
+                      size="md"
+                      onClick={() => setLearnStep(0)}
+                      aria-label="Go back to step 1"
+                      className="min-h-[44px]"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="coral"
+                      size="md"
+                      onClick={() => {
+                        setIsPracticeUnlocked(true);
+                        setActiveStage('Practice');
+                      }}
+                      aria-label="Complete Learn stage and unlock Practice"
+                      className="min-h-[44px] gap-2"
+                    >
+                      <span>Complete Learn & Unlock Practice (50%)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
+
+          {/* STAGE 2: PRACTICE */}
+          {activeStage === 'Practice' && (
+            <Card className="bg-white dark:bg-slate-900 p-6 md:p-8 border border-gray-100 dark:border-slate-800 space-y-6 rounded-3xl shadow-nova-soft">
+              <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Badge variant="coral" className="gap-1.5">
+                    <Zap className="w-3.5 h-3.5" /> Stage 2: Practice (50% Progress)
+                  </Badge>
+                </div>
+                <span className="text-xs font-bold text-nova-charcoal dark:text-slate-100">
+                  Question {currentQIndex + 1} of {questions.length || 10}
+                </span>
+              </div>
+
+              {isLoadingQuestions ? (
+                <div className="text-center py-12 space-y-3">
+                  <Sparkles className="w-8 h-8 text-nova-coral animate-spin mx-auto" />
+                  <div className="text-sm font-bold text-nova-charcoal dark:text-slate-100">
+                    Formulating 10 Mission-Aware AI Drill Questions for "{missionData.title}"...
+                  </div>
+                </div>
+              ) : currentQ ? (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="lavender" className="uppercase text-[10px]">
+                          Concept: {currentQ.concept}
+                        </Badge>
+                      </div>
+                      <span className="text-xs font-extrabold text-purple-700 dark:text-purple-400">
+                        Score: {userScore} / {currentQIndex}
+                      </span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-black text-nova-charcoal dark:text-slate-100 leading-relaxed">
+                      {currentQ.question}
+                    </h3>
+                  </div>
+
+                  <div>
+                    {!showHint ? (
+                      <button
+                        onClick={() => setShowHint(true)}
+                        aria-label="Reveal guided hint"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 hover:text-nova-coral bg-purple-50 dark:bg-purple-950/60 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-800 transition-all min-h-[44px] cursor-pointer"
+                      >
+                        <HelpCircle className="w-4 h-4 text-purple-600" /> Reveal Guided Hint
+                      </button>
+                    ) : (
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-3.5 bg-amber-50 dark:bg-amber-950/60 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-950 dark:text-amber-200 font-medium">
+                        <span className="font-bold block text-amber-900 dark:text-amber-300 mb-0.5">💡 Guided Hint:</span>
+                        Pay attention to local gradient derivatives and matrix shape alignment.
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    {currentQ.options.map((optionText, optIdx) => {
+                      const isSelected = selectedOption === optIdx;
+                      let optStyle = 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-nova-charcoal dark:text-slate-100 hover:border-purple-200';
+
+                      if (isAnswerSubmitted) {
+                        if (optIdx === currentQ.correctAnswer) {
+                          optStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-200 font-bold shadow-sm';
+                        } else if (isSelected) {
+                          optStyle = 'border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-950 dark:text-rose-200';
+                        }
+                      } else if (isSelected) {
+                        optStyle = 'border-nova-coral bg-rose-50/50 dark:bg-rose-950/40 font-bold';
+                      }
+
+                      return (
+                        <button
+                          key={optIdx}
+                          disabled={isAnswerSubmitted}
+                          onClick={() => setSelectedOption(optIdx)}
+                          aria-label={`Select option ${optIdx + 1}: ${optionText}`}
+                          className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between text-xs leading-relaxed text-left min-h-[44px] cursor-pointer ${optStyle}`}
+                        >
+                          <span>{optionText}</span>
+                          {isAnswerSubmitted && optIdx === currentQ.correctAnswer && (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          )}
+                          {isAnswerSubmitted && isSelected && optIdx !== currentQ.correctAnswer && (
+                            <XCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {isAnswerSubmitted && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1 ${
+                        selectedOption === currentQ.correctAnswer
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200'
+                          : 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-950 dark:text-rose-200'
+                      }`}
+                    >
+                      <div className="font-bold flex items-center gap-1.5">
+                        {selectedOption === currentQ.correctAnswer ? '✓ Correct Answer!' : '✗ Explanation:'}
+                      </div>
+                      <p>{currentQ.explanation}</p>
+                    </motion.div>
+                  )}
+
+                  <div className="flex justify-end pt-2">
+                    {!isAnswerSubmitted ? (
+                      <Button
+                        variant="coral"
+                        size="md"
+                        disabled={selectedOption === null}
+                        onClick={handleSubmitAnswer}
+                        aria-label="Submit practice answer and check feedback"
+                        className="min-h-[44px]"
+                      >
+                        Submit Answer & Check Feedback
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="coral"
+                        size="md"
+                        onClick={handleNextQuestion}
+                        aria-label="Advance to next question or stage"
+                        className="min-h-[44px] gap-2"
+                      >
+                        <span>{currentQIndex < questions.length - 1 ? 'Next Question' : 'Complete Practice & Unlock Apply (75%)'}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </Card>
+          )}
+
+          {/* STAGE 3: APPLY */}
+          {activeStage === 'Apply' && (
+            <Card className="bg-white dark:bg-slate-900 p-6 md:p-8 border border-gray-100 dark:border-slate-800 space-y-6 rounded-3xl shadow-nova-soft">
+              <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Badge variant="mint" className="gap-1.5">
+                    <Code className="w-3.5 h-3.5" /> Stage 3: Apply (75% Progress)
+                  </Badge>
+                </div>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">NumPy Execution Engine</span>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-black text-nova-charcoal dark:text-slate-100">
+                    {missionData.applyContent.taskTitle}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    {missionData.applyContent.taskDescription}
+                  </p>
+                </div>
+
+                <textarea
+                  value={userCode}
+                  onChange={(e) => setUserCode(e.target.value)}
+                  rows={9}
+                  aria-label="Code editor for implementation task"
+                  className="w-full p-4 font-mono text-xs bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-nova-lavender"
+                />
+
+                {testOutput && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-black text-emerald-400 font-mono text-xs rounded-2xl border border-emerald-900/60 leading-relaxed whitespace-pre-line">
+                    {testOutput}
+                  </motion.div>
+                )}
+
+                <div className="flex justify-between items-center pt-2 flex-wrap gap-3">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={handleRunCode}
+                    aria-label="Execute unit test runner"
+                    className="min-h-[44px] gap-2"
+                  >
+                    <Play className="w-4 h-4 text-emerald-600" /> Execute Unit Test Runner
+                  </Button>
+
+                  {isTestPassed && (
+                    <Button
+                      variant="coral"
+                      size="md"
+                      onClick={() => { setIsProveUnlocked(true); setActiveStage('Prove'); }}
+                      aria-label="Pass unit tests and unlock Prove stage"
+                      className="min-h-[44px] gap-2"
+                    >
+                      <span>Pass Tests & Unlock Prove (100%)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* STAGE 4: PROVE */}
+          {activeStage === 'Prove' && (
+            <Card className="bg-white dark:bg-slate-900 p-8 border border-gray-100 dark:border-slate-800 space-y-6 text-center rounded-3xl shadow-nova-soft">
+              <div className="w-16 h-16 rounded-3xl bg-nova-mint/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-black mx-auto shadow-sm">
+                <ShieldCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+              </div>
+
+              <div className="space-y-2">
+                <Badge variant="mint">STAGE 4: INDEPENDENT MASTERY PROVEN (100% PROGRESS)</Badge>
+                <h2 className="text-2xl md:text-3xl font-black text-nova-charcoal dark:text-slate-100">
+                  Independent Mastery Verified: {missionData.title}
+                </h2>
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed font-medium">
+                  You completed all 4 stages (Learn → Practice → Apply → Prove) for <strong className="text-nova-charcoal dark:text-white">{missionData.title}</strong> with 100% test pass accuracy.
+                </p>
+              </div>
+
+              <div className="flex justify-center gap-4 pt-4 flex-wrap">
+                <Button
+                  variant="coral"
+                  size="lg"
+                  onClick={() => {
+                    handleFinalizeProve();
+                    navigate('/today');
+                  }}
+                  aria-label="Update Learning Twin and return to Today"
+                  className="min-h-[44px]"
+                >
+                  Update Learning Twin & Return to Today
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {/* Desktop Curriculum Drawer (5/12) & Mobile Slide-Over Sheet */}
+        <div className="md:col-span-5">
+          <div className="sticky top-20">
+            <CurriculumDrawer
+              modules={DEMO_CURRICULUM_MODULES}
+              activeLessonId={conceptId || 'backpropagation-computational-graphs'}
+              onSelectLesson={handleSelectLesson}
+              contentRef={contentRef}
+              isOpen={isCurriculumOpen}
+              onClose={() => setIsCurriculumOpen(false)}
+            />
           </div>
         </div>
       </div>
-
-      {/* STAGE 1: LEARN (Purpose: Conceptual Understanding - 25% Progress) */}
-      {activeStage === 'Learn' && (
-        <Card className="bg-white p-8 border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Badge variant="mint" className="gap-1.5">
-                <BookOpen className="w-3.5 h-3.5" /> Stage 1: Learn (25% Progress)
-              </Badge>
-              <span className="text-xs font-semibold text-nova-muted">Purpose: Master Core Concept Intuition</span>
-            </div>
-            <span className="text-xs font-bold text-nova-charcoal">Step {learnStep + 1} of 2</span>
-          </div>
-
-          {learnStep === 0 ? (
-            <div className="space-y-6">
-              {/* Explanation & Intuition Header */}
-              <div className="space-y-2">
-                <h2 className="text-xl font-black text-nova-charcoal">
-                  {missionData.learnContent.part1Title}
-                </h2>
-                <p className="text-sm text-nova-muted leading-relaxed">
-                  {missionData.learnContent.part1Text}
-                </p>
-              </div>
-
-              {/* Intuition Callout Card */}
-              <div className="bg-purple-50/80 p-4 rounded-2xl border border-purple-100 space-y-1.5 text-xs text-purple-950">
-                <span className="font-extrabold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  Intuition & Core Principle
-                </span>
-                <p className="leading-relaxed">
-                  {missionData.learningObjective}
-                </p>
-              </div>
-
-              {/* Dynamic Interactive Diagram Container */}
-              <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-white space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-300">
-                      Interactive Visual Explanation
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400">Node ID: {missionData.id}</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                  {/* Visual SVG Diagram */}
-                  <div className="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 space-y-3">
-                    {missionData.learnContent.diagramType === 'backprop' && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-nova-coral uppercase text-center mb-2">
-                          Reverse Computational Graph Flow
-                        </div>
-                        <svg className="w-full h-28" viewBox="0 0 200 100">
-                          <line x1="30" y1="50" x2="90" y2="50" stroke="#FF6B6B" strokeWidth="2" strokeDasharray="4 4" className="neural-line" />
-                          <line x1="90" y1="50" x2="160" y2="50" stroke="#A78BFA" strokeWidth="2" strokeDasharray="4 4" className="neural-line" />
-                          <circle cx="30" cy="50" r="10" fill="#FF6B6B" />
-                          <circle cx="90" cy="50" r="10" fill="#A78BFA" />
-                          <circle cx="160" cy="50" r="10" fill="#34D399" />
-                          <text x="30" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">Input X</text>
-                          <text x="90" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">d/dW</text>
-                          <text x="160" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">Loss L</text>
-                        </svg>
-                        <div className="text-[10px] text-center text-slate-400 font-mono">
-                          Forward Pass: X → W → Loss | Backward: dL/dW ← dL/dY
-                        </div>
-                      </div>
-                    )}
-
-                    {missionData.learnContent.diagramType === 'gradient' && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-nova-mint uppercase text-center mb-2">
-                          Gradient Descent Parabola Optimization
-                        </div>
-                        <svg className="w-full h-28" viewBox="0 0 200 100">
-                          <path d="M 20 20 Q 100 110 180 20" fill="none" stroke="#A78BFA" strokeWidth="2.5" />
-                          <line x1="100" y1="60" x2="100" y2="85" stroke="#34D399" strokeWidth="1" strokeDasharray="3 3" />
-                          <text x="100" y="94" fontSize="8" fill="#34D399" textAnchor="middle" fontWeight="bold">Min Loss J(w)</text>
-                          <motion.circle
-                            cx="40"
-                            cy="35"
-                            r="6"
-                            fill="#FF6B6B"
-                            animate={{ cx: [40, 70, 95, 100], cy: [35, 53, 64, 65] }}
-                            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-                          />
-                        </svg>
-                        <div className="text-[10px] text-center text-slate-400 font-mono">
-                          w ← w - α ∇J(w)
-                        </div>
-                      </div>
-                    )}
-
-                    {missionData.learnContent.diagramType === 'matrix' && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-purple-300 uppercase text-center mb-2">
-                          Matrix Tensor Transformation
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900 rounded-xl border border-slate-800 text-[10px] font-mono text-center">
-                          <motion.div
-                            animate={{ scale: [1, 1.06, 1], backgroundColor: ['#1e293b', '#3b0764', '#1e293b'] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="p-2.5 rounded-lg border border-purple-500/40 text-purple-200"
-                          >
-                            [W11  W12]<br/>[W21  W22]
-                          </motion.div>
-                          <motion.div
-                            animate={{ scale: [1, 1.06, 1], backgroundColor: ['#1e293b', '#064e3b', '#1e293b'] }}
-                            transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
-                            className="p-2.5 rounded-lg border border-emerald-500/40 text-emerald-200"
-                          >
-                            [X1  X2]^T
-                          </motion.div>
-                        </div>
-                        <div className="text-[10px] text-center text-slate-400 font-mono mt-2">
-                          Output Y = MatrixDot(W, X) + B
-                        </div>
-                      </div>
-                    )}
-
-                    {missionData.learnContent.diagramType === 'hashmap' && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-nova-coral uppercase text-center mb-2">
-                          HashMap Hash Buckets & Open Addressing
-                        </div>
-                        <div className="space-y-1 font-mono text-[10px]">
-                          <div className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between">
-                            <span>Bucket [0]: hash("key1") % 10</span>
-                            <span className="text-emerald-400">→ Entry 12</span>
-                          </div>
-                          <div className="p-1.5 bg-purple-950/80 rounded border border-purple-800 flex justify-between">
-                            <span>Bucket [1]: Collision Probe</span>
-                            <span className="text-nova-coral">→ Entry 22</span>
-                          </div>
-                          <div className="p-1.5 bg-slate-900 rounded border border-slate-800 flex justify-between">
-                            <span>Bucket [2]: Slot Available</span>
-                            <span className="text-purple-300">→ Entry 32</span>
-                          </div>
-                        </div>
-                        <div className="text-[10px] text-center text-slate-400 font-mono mt-2">
-                          Average Complexity: O(1) Search / Insert
-                        </div>
-                      </div>
-                    )}
-
-                    {(missionData.learnContent.diagramType === 'neuralnet' || missionData.learnContent.diagramType === 'code') && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-purple-300 uppercase text-center mb-2">
-                          Neural Signal Execution Pipeline
-                        </div>
-                        <svg className="w-full h-28" viewBox="0 0 200 100">
-                          <line x1="30" y1="30" x2="100" y2="50" stroke="#475569" strokeWidth="1.5" />
-                          <line x1="30" y1="70" x2="100" y2="50" stroke="#475569" strokeWidth="1.5" />
-                          <line x1="100" y1="50" x2="170" y2="50" stroke="#475569" strokeWidth="1.5" />
-                          <circle cx="30" cy="30" r="8" fill="#FF6B6B" />
-                          <circle cx="30" cy="70" r="8" fill="#FF6B6B" />
-                          <circle cx="100" cy="50" r="8" fill="#A78BFA" />
-                          <circle cx="170" cy="50" r="8" fill="#34D399" />
-                          <text x="30" y="34" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">X1</text>
-                          <text x="30" y="74" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">X2</text>
-                          <text x="100" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">W</text>
-                          <text x="170" y="54" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="bold">Out</text>
-                          <circle cx="65" cy="40" r="3" fill="#FCD34D" className="animate-ping" />
-                        </svg>
-                        <div className="text-[10px] text-center text-slate-400 font-mono">
-                          Input Layer → Weights → Output Tensor
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Key Ideas Checklist */}
-                  <div className="space-y-3 text-xs text-slate-300 font-mono">
-                    <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
-                      <span className="font-bold text-purple-300 block uppercase flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-nova-mint" /> Key Concept Takeaways
-                      </span>
-                      <ul className="space-y-1.5 text-[11px] text-slate-300">
-                        <li className="flex items-center gap-1.5">
-                          <span className="text-nova-coral">•</span> {missionData.title} formulation
-                        </li>
-                        <li className="flex items-center gap-1.5">
-                          <span className="text-nova-lavender">•</span> Structural derivative calculation
-                        </li>
-                        <li className="flex items-center gap-1.5">
-                          <span className="text-nova-mint">•</span> Numerical precision stability
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button variant="coral" size="md" onClick={() => setLearnStep(1)}>
-                  Next: Formulation & Code Example <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-xl font-black text-nova-charcoal">
-                  {missionData.learnContent.part2Title}
-                </h2>
-                <p className="text-sm text-nova-muted leading-relaxed">
-                  {missionData.learnContent.part2Text}
-                </p>
-              </div>
-
-              {missionData.learnContent.codeSnippet && (
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-nova-charcoal uppercase tracking-wider">
-                    Code Example:
-                  </span>
-                  <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-purple-300 space-y-1 overflow-x-auto">
-                    <pre>{missionData.learnContent.codeSnippet}</pre>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-4 border-t border-gray-100">
-                <Button variant="ghost" size="md" onClick={() => setLearnStep(0)}>
-                  Back
-                </Button>
-                <Button
-                  variant="coral"
-                  size="md"
-                  onClick={() => {
-                    setIsPracticeUnlocked(true);
-                    setActiveStage('Practice');
-                  }}
-                >
-                  Complete Learn & Unlock Practice (50%) <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* STAGE 2: PRACTICE (Purpose: Build Skill with Guided Drills & Hints - 50% Progress) */}
-      {activeStage === 'Practice' && (
-        <Card className="bg-white p-8 border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Badge variant="coral" className="gap-1.5">
-                <Zap className="w-3.5 h-3.5" /> Stage 2: Practice (50% Progress)
-              </Badge>
-              <span className="text-xs font-semibold text-nova-muted">Purpose: Build Skill with Guided AI Drills</span>
-            </div>
-            <span className="text-xs font-bold text-nova-charcoal">
-              Question {currentQIndex + 1} of {questions.length || 10}
-            </span>
-          </div>
-
-          {isLoadingQuestions ? (
-            <div className="text-center py-12 space-y-3">
-              <Sparkles className="w-8 h-8 text-nova-coral animate-spin mx-auto" />
-              <div className="text-sm font-bold text-nova-charcoal">
-                Formulating 10 Mission-Aware AI Drill Questions for "{missionData.title}"...
-              </div>
-              <p className="text-xs text-nova-muted">Generating adaptive MCQ, scenario, and debugging questions via Gemini API.</p>
-            </div>
-          ) : currentQ ? (
-            <div className="space-y-6">
-              {/* Question Header & Type */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="lavender" className="uppercase text-[10px]">
-                      Mission: {currentQ.missionId || missionData.id}
-                    </Badge>
-                    <Badge variant="coral" className="uppercase text-[10px]">
-                      Concept: {currentQ.concept}
-                    </Badge>
-                    <Badge variant="outline" className="uppercase text-[10px]">
-                      Type: {currentQ.type || 'conceptual'}
-                    </Badge>
-                  </div>
-                  <span className="text-xs font-extrabold text-purple-700">
-                    Current Score: {userScore} / {currentQIndex}
-                  </span>
-                </div>
-                <h3 className="text-base md:text-lg font-black text-nova-charcoal leading-relaxed">
-                  {currentQ.question}
-                </h3>
-              </div>
-
-              {/* Guided Hint Button & Box */}
-              <div>
-                {!showHint ? (
-                  <button
-                    onClick={() => setShowHint(true)}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 hover:text-nova-coral bg-purple-50 px-3 py-1.5 rounded-xl border border-purple-100 transition-all"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" /> Reveal Hint
-                  </button>
-                ) : (
-                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-950 font-medium">
-                    <span className="font-bold block text-amber-900 mb-0.5">💡 Guided Hint:</span>
-                    Pay attention to local gradient derivatives and tensor shape alignment.
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Options list */}
-              <div className="space-y-3">
-                {currentQ.options.map((optionText, optIdx) => {
-                  const isSelected = selectedOption === optIdx;
-                  let optStyle = 'border-gray-200 bg-white text-nova-charcoal hover:border-purple-200';
-
-                  if (isAnswerSubmitted) {
-                    if (optIdx === currentQ.correctAnswer) {
-                      optStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-bold shadow-sm';
-                    } else if (isSelected) {
-                      optStyle = 'border-rose-500 bg-rose-50 text-rose-950';
-                    }
-                  } else if (isSelected) {
-                    optStyle = 'border-nova-coral bg-rose-50/50 font-bold';
-                  }
-
-                  return (
-                    <div
-                      key={optIdx}
-                      onClick={() => !isAnswerSubmitted && setSelectedOption(optIdx)}
-                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between text-xs leading-relaxed ${optStyle}`}
-                    >
-                      <span>{optionText}</span>
-                      {isAnswerSubmitted && optIdx === currentQ.correctAnswer && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      )}
-                      {isAnswerSubmitted && isSelected && optIdx !== currentQ.correctAnswer && (
-                        <XCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Immediate Feedback Box after submission */}
-              {isAnswerSubmitted && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1 ${
-                    selectedOption === currentQ.correctAnswer
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                      : 'bg-rose-50 border-rose-200 text-rose-950'
-                  }`}
-                >
-                  <div className="font-bold flex items-center gap-1.5">
-                    {selectedOption === currentQ.correctAnswer ? '✓ Correct Answer!' : '✗ Explanation:'}
-                  </div>
-                  <p>{currentQ.explanation}</p>
-                </motion.div>
-              )}
-
-              {/* Action Button */}
-              <div className="flex justify-end pt-2">
-                {!isAnswerSubmitted ? (
-                  <Button
-                    variant="coral"
-                    size="md"
-                    disabled={selectedOption === null}
-                    onClick={handleSubmitAnswer}
-                  >
-                    Submit Answer & Check Feedback
-                  </Button>
-                ) : (
-                  <Button variant="coral" size="md" onClick={handleNextQuestion}>
-                    {currentQIndex < questions.length - 1 ? 'Next Practice Question' : 'Complete Practice & Unlock Apply (75%)'}{' '}
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : null}
-        </Card>
-      )}
-
-      {/* STAGE 3: APPLY (Purpose: Use Concept in Realistic Problem - 75% Progress) */}
-      {activeStage === 'Apply' && (
-        <Card className="bg-white p-8 border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Badge variant="mint" className="gap-1.5">
-                <Code className="w-3.5 h-3.5" /> Stage 3: Apply (75% Progress)
-              </Badge>
-              <span className="text-xs font-semibold text-nova-muted">Purpose: Solve Realistic Engineering Problem</span>
-            </div>
-            <span className="text-xs font-bold text-emerald-700">NumPy Execution Engine</span>
-          </div>
-
-          <div className="space-y-4">
-            {/* Real-world Scenario Context Card */}
-            <div className="p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-2xl border border-emerald-100 space-y-1">
-              <span className="text-xs font-black text-emerald-900 uppercase tracking-wider block flex items-center gap-1.5">
-                <Target className="w-4 h-4 text-emerald-600" /> Real-World Problem Scenario
-              </span>
-              <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                You are engineering a production machine learning pipeline. Implement the module below to pass all vectorized unit test cases.
-              </p>
-            </div>
-
-            <div className="space-y-1">
-              <h3 className="text-lg font-black text-nova-charcoal">
-                {missionData.applyContent.taskTitle}
-              </h3>
-              <p className="text-xs text-nova-muted leading-relaxed">
-                {missionData.applyContent.taskDescription}
-              </p>
-            </div>
-
-            <textarea
-              value={userCode}
-              onChange={(e) => setUserCode(e.target.value)}
-              rows={9}
-              className="w-full p-4 font-mono text-xs bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-nova-lavender"
-            />
-
-            {testOutput && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-black text-emerald-400 font-mono text-xs rounded-2xl border border-emerald-900/60 leading-relaxed whitespace-pre-line">
-                {testOutput}
-              </motion.div>
-            )}
-
-            <div className="flex justify-between items-center pt-2">
-              <Button variant="secondary" size="md" onClick={handleRunCode}>
-                <Play className="w-4 h-4 mr-1 text-emerald-600" /> Execute Unit Test Runner
-              </Button>
-
-              {isTestPassed && (
-                <Button variant="coral" size="md" onClick={() => { setIsProveUnlocked(true); setActiveStage('Prove'); }}>
-                  Pass All Tests & Unlock Prove (100%) <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* STAGE 4: PROVE (Purpose: Independent Mastery Assessment - 100% Progress) */}
-      {activeStage === 'Prove' && (
-        <Card className="bg-white p-8 border border-gray-100 space-y-6 text-center">
-          <div className="w-16 h-16 rounded-3xl bg-nova-mint/20 text-emerald-800 flex items-center justify-center font-black mx-auto shadow-sm">
-            <ShieldCheck className="w-8 h-8 text-emerald-600" />
-          </div>
-
-          <div className="space-y-2">
-            <Badge variant="mint">STAGE 4: INDEPENDENT MASTERY PROVEN (100% PROGRESS)</Badge>
-            <h2 className="text-3xl font-black text-nova-charcoal">
-              Independent Mastery Verified: {missionData.title}
-            </h2>
-            <p className="text-xs text-nova-muted max-w-md mx-auto leading-relaxed">
-              You independently completed all 4 stages (Learn → Practice → Apply → Prove) for <strong className="text-nova-charcoal">{missionData.title}</strong> with a Practice Score of <strong className="text-nova-coral">{Math.round((userScore / (questions.length || 10)) * 100)}%</strong> and 100% Unit Test Pass accuracy.
-            </p>
-          </div>
-
-          {/* Telemetry Mastery Badge & XP Reward */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto text-left">
-            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
-              <div className="text-[10px] font-bold text-nova-muted uppercase">Concept Status</div>
-              <div className="text-sm font-extrabold text-emerald-600 mt-1">Mastered ✓</div>
-            </div>
-            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
-              <div className="text-[10px] font-bold text-nova-muted uppercase">XP Earned</div>
-              <div className="text-sm font-extrabold text-nova-yellow mt-1">+250 XP</div>
-            </div>
-            <div className="bg-nova-bg p-4 rounded-2xl border border-gray-200 text-center">
-              <div className="text-[10px] font-bold text-nova-muted uppercase">Learning Twin</div>
-              <div className="text-sm font-extrabold text-purple-700 mt-1">Telemetry Synced</div>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-4 pt-4">
-            <Button
-              variant="coral"
-              size="lg"
-              onClick={() => {
-                handleFinalizeProve();
-                navigate('/today');
-              }}
-            >
-              Update Learning Twin & Return to Today
-            </Button>
-            <Button variant="secondary" size="lg" onClick={() => navigate('/universe')}>
-              View Knowledge Universe Graph
-            </Button>
-          </div>
-        </Card>
-      )}
     </div>
   );
 };

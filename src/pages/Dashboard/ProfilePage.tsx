@@ -28,7 +28,7 @@ export const ProfilePage: React.FC = () => {
   const gapConcepts = concepts.filter((c) => c.status === 'Knowledge Gap' || c.status === 'Needs Practice');
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-10">
+    <div className="space-y-8 max-w-5xl mx-auto pb-10 font-sans">
       {/* 1. HERO HEADER */}
       <Card className="bg-gradient-to-br from-nova-charcoal via-slate-900 to-purple-950 p-8 rounded-3xl border border-slate-800 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-nova-coral/20 rounded-full blur-3xl pointer-events-none" />
@@ -73,34 +73,34 @@ export const ProfilePage: React.FC = () => {
       {/* 2. LEARNING OVERVIEW & TELEMETRY */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-          <Card className="bg-white p-5 border border-gray-100 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all">
-            <div className="text-xs font-bold text-nova-muted">Overall Mastery</div>
-            <div className="text-2xl font-black text-nova-charcoal">{mastery}%</div>
-            <div className="text-[10px] text-emerald-600 font-semibold">↑ 8% this week</div>
+          <Card className="bg-white dark:bg-slate-900 p-5 border border-gray-100 dark:border-slate-800 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all rounded-3xl">
+            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">Overall Mastery</div>
+            <div className="text-2xl font-black text-nova-charcoal dark:text-slate-100">{mastery}%</div>
+            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">↑ 8% this week</div>
           </Card>
         </motion.div>
 
         <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-          <Card className="bg-white p-5 border border-gray-100 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all">
-            <div className="text-xs font-bold text-nova-muted">Concepts Mastered</div>
-            <div className="text-2xl font-black text-emerald-600">{masteredConcepts.length} Nodes</div>
-            <div className="text-[10px] text-nova-muted font-semibold">of {concepts.length} total</div>
+          <Card className="bg-white dark:bg-slate-900 p-5 border border-gray-100 dark:border-slate-800 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all rounded-3xl">
+            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">Concepts Mastered</div>
+            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{masteredConcepts.length} Nodes</div>
+            <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold">of {concepts.length} total</div>
           </Card>
         </motion.div>
 
         <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-          <Card className="bg-white p-5 border border-gray-100 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all">
-            <div className="text-xs font-bold text-nova-muted">Knowledge Gaps</div>
+          <Card className="bg-white dark:bg-slate-900 p-5 border border-gray-100 dark:border-slate-800 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all rounded-3xl">
+            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">Knowledge Gaps</div>
             <div className="text-2xl font-black text-nova-coral">{gapConcepts.length} Active</div>
             <div className="text-[10px] text-nova-coral font-semibold">Requires practice</div>
           </Card>
         </motion.div>
 
         <motion.div whileHover={{ y: -3, scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-          <Card className="bg-white p-5 border border-gray-100 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all">
-            <div className="text-xs font-bold text-nova-muted">Retention Accuracy</div>
-            <div className="text-2xl font-black text-purple-700">{retention}%</div>
-            <div className="text-[10px] text-purple-600 font-semibold">Top 5% learner</div>
+          <Card className="bg-white dark:bg-slate-900 p-5 border border-gray-100 dark:border-slate-800 text-center space-y-1 shadow-nova-soft hover:shadow-xl transition-all rounded-3xl">
+            <div className="text-xs font-bold text-slate-600 dark:text-slate-300">Retention Accuracy</div>
+            <div className="text-2xl font-black text-purple-700 dark:text-purple-300">{retention}%</div>
+            <div className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Top 5% learner</div>
           </Card>
         </motion.div>
       </div>
@@ -108,9 +108,9 @@ export const ProfilePage: React.FC = () => {
       {/* 3. SKILL RADAR & AI INSIGHTS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Skill Radar Bars */}
-        <Card className="lg:col-span-7 bg-white p-6 border border-gray-100 space-y-4 shadow-nova-soft">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-            <h3 className="text-sm font-black text-nova-charcoal uppercase tracking-wider flex items-center gap-1.5">
+        <Card className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 border border-gray-100 dark:border-slate-800 space-y-4 shadow-nova-soft rounded-3xl">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-sm font-black text-nova-charcoal dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
               <BrainCircuit className="w-4 h-4 text-nova-coral" />
               Skill Domain Radar
             </h3>
@@ -120,11 +120,11 @@ export const ProfilePage: React.FC = () => {
           <div className="space-y-3">
             {skillRadar.map((sr, idx) => (
               <div key={sr.skill} className="space-y-1">
-                <div className="flex justify-between text-xs font-bold text-nova-charcoal">
+                <div className="flex justify-between text-xs font-bold text-nova-charcoal dark:text-slate-100">
                   <span>{sr.skill}</span>
                   <span>{sr.mastery}%</span>
                 </div>
-                <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${sr.mastery}%` }}
@@ -138,27 +138,27 @@ export const ProfilePage: React.FC = () => {
         </Card>
 
         {/* Right: AI Profile Insights */}
-        <Card className="lg:col-span-5 bg-gradient-to-br from-rose-50/80 via-purple-50/80 to-emerald-50/80 p-6 border border-purple-100 space-y-4 shadow-md glow-lavender">
+        <Card className="lg:col-span-5 bg-gradient-to-br from-rose-50/80 via-purple-50/80 to-emerald-50/80 dark:from-slate-900 dark:via-purple-950/60 dark:to-slate-900 p-6 border border-purple-100 dark:border-purple-800 space-y-4 shadow-md glow-lavender rounded-3xl">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-nova-coral animate-spin" style={{ animationDuration: '6s' }} />
-            <h3 className="text-xs font-black text-nova-charcoal uppercase tracking-wider">
+            <h3 className="text-xs font-black text-nova-charcoal dark:text-slate-100 uppercase tracking-wider">
               AI Profile Insights
             </h3>
           </div>
 
-          <div className="space-y-3 text-xs text-nova-muted leading-relaxed">
-            <div className="p-3 bg-white/90 rounded-xl border border-purple-100 space-y-1 shadow-sm">
-              <span className="font-extrabold text-nova-charcoal block">Practicing Patterns</span>
+          <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <div className="p-3 bg-white/90 dark:bg-slate-800/90 rounded-xl border border-purple-100 dark:border-purple-800 space-y-1 shadow-sm">
+              <span className="font-extrabold text-nova-charcoal dark:text-slate-100 block">Practicing Patterns</span>
               <p>NOVA noticed that your retention is 24% higher when interactive code exercises immediately follow concept readings.</p>
             </div>
 
-            <div className="p-3 bg-white/90 rounded-xl border border-purple-100 space-y-1 shadow-sm">
-              <span className="font-extrabold text-rose-900 block">Active Knowledge Gap</span>
+            <div className="p-3 bg-white/90 dark:bg-slate-800/90 rounded-xl border border-purple-100 dark:border-purple-800 space-y-1 shadow-sm">
+              <span className="font-extrabold text-rose-900 dark:text-rose-300 block">Active Knowledge Gap</span>
               <p>HashMap collision accuracy (53%) is lower than Arrays (92%). Prioritize the HashMap recovery mission before System Design.</p>
             </div>
 
-            <div className="p-3 bg-white/90 rounded-xl border border-purple-100 space-y-1 shadow-sm">
-              <span className="font-extrabold text-purple-900 block">Learning Speed Momentum</span>
+            <div className="p-3 bg-white/90 dark:bg-slate-800/90 rounded-xl border border-purple-100 dark:border-purple-800 space-y-1 shadow-sm">
+              <span className="font-extrabold text-purple-900 dark:text-purple-300 block">Learning Speed Momentum</span>
               <p>Your recent learning pace increased 18% over the last 7 days!</p>
             </div>
           </div>
@@ -168,11 +168,11 @@ export const ProfilePage: React.FC = () => {
       {/* 4. ACHIEVEMENTS SECTION */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black text-nova-charcoal uppercase tracking-wider flex items-center gap-1.5">
+          <h3 className="text-sm font-black text-nova-charcoal dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
             <Award className="w-4 h-4 text-nova-yellow" />
             Learner Achievements
           </h3>
-          <span className="text-xs font-bold text-nova-muted">
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
             {achievements.filter((a) => a.unlocked).length} / {achievements.length} Unlocked
           </span>
         </div>
@@ -181,24 +181,24 @@ export const ProfilePage: React.FC = () => {
           {achievements.map((ach) => (
             <motion.div key={ach.id} whileHover={{ y: -3, scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
               <Card
-                className={`p-5 border transition-all ${
+                className={`p-5 border transition-all rounded-3xl ${
                   ach.unlocked
-                    ? 'bg-white border-purple-200 shadow-md glow-yellow'
-                    : 'bg-gray-50 border-gray-200 opacity-60'
+                    ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-800 shadow-md glow-yellow'
+                    : 'bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-slate-800 opacity-60'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="text-2xl p-2 bg-nova-bg rounded-2xl border border-gray-200 flex-shrink-0">
+                  <div className="text-2xl p-2 bg-nova-bg dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 flex-shrink-0">
                     {ach.icon}
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-nova-charcoal">{ach.title}</h4>
-                      {ach.unlocked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                      <h4 className="text-xs font-bold text-nova-charcoal dark:text-slate-100">{ach.title}</h4>
+                      {ach.unlocked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
                     </div>
-                    <p className="text-[11px] text-nova-muted leading-relaxed">{ach.description}</p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{ach.description}</p>
                     {ach.unlockedAt && (
-                      <span className="text-[9px] font-bold text-purple-700 block pt-1">
+                      <span className="text-[9px] font-bold text-purple-700 dark:text-purple-300 block pt-1">
                         Unlocked {ach.unlockedAt}
                       </span>
                     )}
@@ -212,3 +212,5 @@ export const ProfilePage: React.FC = () => {
     </div>
   );
 };
+
+export default ProfilePage;
