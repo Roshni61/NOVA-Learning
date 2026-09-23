@@ -168,3 +168,5 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({ isOp
     </AnimatePresence>
   );
 };
+
+export default WhatIfSimulatorModal;

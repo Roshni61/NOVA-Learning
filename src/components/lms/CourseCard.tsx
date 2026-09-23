@@ -31,6 +31,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           <img
             src={course.thumbnail}
             alt={course.title}
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
           />
           <div className="absolute top-3 left-3">

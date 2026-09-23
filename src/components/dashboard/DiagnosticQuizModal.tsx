@@ -386,3 +386,5 @@ export const DiagnosticQuizModal: React.FC<DiagnosticQuizModalProps> = ({ isOpen
     </AnimatePresence>
   );
 };
+
+export default DiagnosticQuizModal;

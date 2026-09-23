@@ -232,3 +232,5 @@ export const TutorDrawer: React.FC = () => {
     </>
   );
 };
+
+export default TutorDrawer;

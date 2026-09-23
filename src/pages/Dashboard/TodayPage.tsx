@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
-import { WhatIfSimulatorModal } from '../../components/dashboard/WhatIfSimulatorModal';
-import { DiagnosticQuizModal } from '../../components/dashboard/DiagnosticQuizModal';
-import { TutorDrawer } from '../../components/tutor/TutorDrawer';
+
+// Lazy-loaded heavy client modals and drawers
+const WhatIfSimulatorModal = lazy(() => import('../../components/dashboard/WhatIfSimulatorModal'));
+const DiagnosticQuizModal = lazy(() => import('../../components/dashboard/DiagnosticQuizModal'));
+const TutorDrawer = lazy(() => import('../../components/tutor/TutorDrawer'));
 
 interface Mission {
   id: string;
@@ -359,20 +361,18 @@ export const TodayPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Simulator Modal */}
-      <WhatIfSimulatorModal
-        isOpen={isSimulatorOpen}
-        onClose={() => setIsSimulatorOpen(false)}
-      />
-
-      {/* Diagnostic Baseline Quiz Modal */}
-      <DiagnosticQuizModal
-        isOpen={isQuizOpen}
-        onClose={() => setIsQuizOpen(false)}
-      />
-
-      {/* Floating AI Tutor Launcher */}
-      <TutorDrawer />
+      {/* Lazy-loaded Modals & Drawers */}
+      <Suspense fallback={null}>
+        <WhatIfSimulatorModal
+          isOpen={isSimulatorOpen}
+          onClose={() => setIsSimulatorOpen(false)}
+        />
+        <DiagnosticQuizModal
+          isOpen={isQuizOpen}
+          onClose={() => setIsQuizOpen(false)}
+        />
+        <TutorDrawer />
+      </Suspense>
     </div>
   );
 };
