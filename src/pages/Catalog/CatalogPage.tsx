@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   Filter,
@@ -9,8 +10,13 @@ import {
   SlidersHorizontal,
   SearchX,
   RefreshCw,
+  X,
+  ArrowRight,
+  Clock,
+  Star,
+  Award,
 } from 'lucide-react';
-import { Button, Badge } from '../../components/ui';
+import { Button, Card, Badge } from '../../components/ui';
 import { CourseCard } from '../../components/lms';
 import { mockCourses } from '../../mock/data';
 import { useDebounce, useCourseProgress } from '../../hooks';
@@ -19,9 +25,11 @@ import type { Course } from '../../types';
 const CATEGORIES = ['All', 'Engineering', 'Design', 'Artificial Intelligence', 'Foundations'];
 
 export const CatalogPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'rating' | 'lessons' | 'title'>('rating');
+  const [activeCourse, setActiveCourse] = useState<Course | null>(null);
 
   // Debounce search input by 300ms to avoid expensive recalculations on every single keypress
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -59,6 +67,20 @@ export const CatalogPage: React.FC = () => {
   };
 
   const isFiltered = searchTerm.trim() !== '' || selectedCategory !== 'All';
+
+  const handleCourseSelected = (course: Course) => {
+    setActiveCourse(course);
+  };
+
+  const handleStartMission = (courseId: string) => {
+    const targetMissionId =
+      courseId === 'c_102'
+        ? 'matrix-calculus-gradient-descent'
+        : courseId === 'c_103'
+        ? 'rag'
+        : 'backpropagation-computational-graphs';
+    navigate(`/mission/${targetMissionId}`);
+  };
 
   return (
     <div className="space-y-8 font-sans max-w-7xl mx-auto pb-12">
@@ -109,7 +131,7 @@ export const CatalogPage: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search courses by title, instructor, or keywords... (300ms debounced)"
+              placeholder="Search courses by title, instructor, or keywords..."
               aria-label="Search courses by title, instructor, or keywords"
               className="w-full pl-11 pr-10 py-3 bg-nova-bg dark:bg-slate-850 rounded-2xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-nova-charcoal dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-nova-coral min-h-[44px]"
             />
@@ -117,7 +139,7 @@ export const CatalogPage: React.FC = () => {
               <button
                 onClick={() => setSearchTerm('')}
                 aria-label="Clear search query input"
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
               >
                 <XCircle className="w-4 h-4" />
               </button>
@@ -203,7 +225,10 @@ export const CatalogPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <CourseCard course={courseWithLiveProgress} />
+                <CourseCard
+                  course={courseWithLiveProgress}
+                  onSelect={() => handleCourseSelected(courseWithLiveProgress)}
+                />
               </motion.div>
             );
           })}
@@ -251,6 +276,109 @@ export const CatalogPage: React.FC = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Interactive Course Inspector Modal */}
+      <AnimatePresence>
+        {activeCourse && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-2xl font-sans"
+            >
+              <Card className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 relative overflow-hidden">
+                {/* Close Button */}
+                <button
+                  onClick={() => setActiveCourse(null)}
+                  aria-label="Close course detail modal"
+                  className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-slate-400 hover:text-nova-charcoal dark:hover:text-slate-100 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Banner Thumbnail */}
+                <div className="w-full aspect-video rounded-2xl overflow-hidden relative bg-slate-950 border border-slate-800 shadow-md">
+                  <img
+                    src={activeCourse.thumbnail}
+                    alt={activeCourse.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+                    <Badge variant="lavender" className="text-xs font-bold">
+                      {activeCourse.category}
+                    </Badge>
+                    <span className="text-xs font-bold flex items-center gap-1 text-amber-400 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      {activeCourse.rating} Rating
+                    </span>
+                  </div>
+                </div>
+
+                {/* Title & Instructor */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      Instructor: <strong className="text-nova-charcoal dark:text-slate-200">{activeCourse.instructor}</strong>
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-nova-charcoal dark:text-slate-100">
+                    {activeCourse.title}
+                  </h2>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    {activeCourse.description}
+                  </p>
+                </div>
+
+                {/* Stats & Progress */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-nova-bg dark:bg-slate-800/60 rounded-2xl border border-gray-200 dark:border-slate-700 text-xs">
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Lessons</div>
+                    <div className="font-extrabold text-nova-charcoal dark:text-slate-100 flex items-center gap-1 mt-0.5">
+                      <BookOpen className="w-3.5 h-3.5 text-nova-coral" /> {activeCourse.lessonsCount} Modules
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Duration</div>
+                    <div className="font-extrabold text-nova-charcoal dark:text-slate-100 flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> {activeCourse.duration}
+                    </div>
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Progress</div>
+                    <div className="font-extrabold text-nova-coral flex items-center gap-1 mt-0.5">
+                      <Award className="w-3.5 h-3.5" /> {activeCourse.progress || 0}% Done
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2 border-t border-gray-100 dark:border-slate-800">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    onClick={() => setActiveCourse(null)}
+                    className="w-full sm:w-auto font-bold text-xs min-h-[44px]"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    variant="coral"
+                    size="md"
+                    onClick={() => handleStartMission(activeCourse.id)}
+                    aria-label={`Launch ${activeCourse.title} course workspace`}
+                    className="w-full sm:w-auto gap-2 font-bold text-xs shadow-nova-soft min-h-[44px]"
+                  >
+                    <span>Launch Course Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
