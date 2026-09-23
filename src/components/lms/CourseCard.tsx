@@ -31,13 +31,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
     if (onSelect) {
       onSelect(course.id);
     } else {
-      const targetMissionId =
-        course.id === 'c_102'
-          ? 'matrix-calculus-gradient-descent'
-          : course.id === 'c_103'
-          ? 'rag'
-          : 'backpropagation-computational-graphs';
-      navigate(`/mission/${targetMissionId}`);
+      navigate(`/course/${course.id}`);
     }
   };
 

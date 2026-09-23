@@ -68,10 +68,6 @@ export const CatalogPage: React.FC = () => {
 
   const isFiltered = searchTerm.trim() !== '' || selectedCategory !== 'All';
 
-  const handleCourseSelected = (course: Course) => {
-    setActiveCourse(course);
-  };
-
   const handleStartMission = (courseId: string) => {
     const targetMissionId =
       courseId === 'c_102'
@@ -227,7 +223,7 @@ export const CatalogPage: React.FC = () => {
               >
                 <CourseCard
                   course={courseWithLiveProgress}
-                  onSelect={() => handleCourseSelected(courseWithLiveProgress)}
+                  onSelect={() => navigate(`/course/${course.id}`)}
                 />
               </motion.div>
             );

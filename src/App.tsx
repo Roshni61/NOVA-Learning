@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import('./pages/Auth/LoginPage').then((m) => ({ def
 const OnboardingPage = lazy(() => import('./pages/Auth/OnboardingPage').then((m) => ({ default: m.OnboardingPage })));
 const TodayPage = lazy(() => import('./pages/Dashboard/TodayPage').then((m) => ({ default: m.TodayPage })));
 const CatalogPage = lazy(() => import('./pages/Catalog/CatalogPage').then((m) => ({ default: m.CatalogPage })));
+const CourseDetailPage = lazy(() => import('./pages/Catalog/CourseDetailPage').then((m) => ({ default: m.CourseDetailPage })));
 const UniversePage = lazy(() => import('./pages/Dashboard/UniversePage').then((m) => ({ default: m.UniversePage })));
 const PathPage = lazy(() => import('./pages/Dashboard/PathPage').then((m) => ({ default: m.PathPage })));
 const TutorPage = lazy(() => import('./pages/Dashboard/TutorPage').then((m) => ({ default: m.TutorPage })));
@@ -33,6 +34,7 @@ export const App: React.FC = () => {
               <Route element={<AppLayout />}>
                 <Route path="/today" element={<TodayPage />} />
                 <Route path="/catalog" element={<CatalogPage />} />
+                <Route path="/course/:courseId" element={<CourseDetailPage />} />
                 <Route path="/universe" element={<UniversePage />} />
                 <Route path="/path" element={<PathPage />} />
                 <Route path="/tutor" element={<TutorPage />} />
