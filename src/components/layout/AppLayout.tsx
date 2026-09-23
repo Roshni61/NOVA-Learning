@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,7 +16,7 @@ import {
 import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';
 import { mockUser } from '../../mock/data';
-import { GlobalSearchModal } from './GlobalSearchModal';
+import { CommandPalette } from '../common/CommandPalette';
 
 const NAV_ITEMS = [
   { path: '/today', label: 'Today', icon: Sparkles },
@@ -29,8 +29,34 @@ const NAV_ITEMS = [
 
 export const AppLayout: React.FC = () => {
   const location = useLocation();
-  const { targetGoal, streak, theme, toggleTheme } = useGoal();
+  const { targetGoal, theme, toggleTheme, userXP, userLevel } = useGoal();
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+
+  // Global Keyboard Shortcut: Cmd/Ctrl + K with Chromium e.preventDefault()
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault(); // Prevents Chrome/Edge URL omnibar focus!
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Body Scroll Lock when Command Palette is open
+  useEffect(() => {
+    if (isSearchOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSearchOpen]);
 
   return (
     <div className="min-h-screen bg-nova-bg dark:bg-slate-950 text-nova-charcoal dark:text-slate-100 flex flex-col font-sans selection:bg-nova-lavender pb-20 md:pb-0 transition-colors duration-300">
@@ -122,8 +148,8 @@ export const AppLayout: React.FC = () => {
           >
             <div className="flex items-center gap-1 text-xs font-bold text-nova-charcoal dark:text-slate-100">
               <Flame className="w-4 h-4 text-nova-coral fill-nova-coral" />
-              <span className="hidden sm:inline">Level 4</span>
-              <span className="text-slate-500 dark:text-slate-300 text-[10px]">• {streak}D</span>
+              <span className="hidden sm:inline">Lvl {userLevel}</span>
+              <span className="text-slate-500 dark:text-slate-300 text-[10px]">• {userXP} XP</span>
             </div>
 
             <img
@@ -179,8 +205,8 @@ export const AppLayout: React.FC = () => {
         })}
       </nav>
 
-      {/* Global AI Search Modal */}
-      <GlobalSearchModal
+      {/* Command Palette Modal (⌘K / Ctrl+K) */}
+      <CommandPalette
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />

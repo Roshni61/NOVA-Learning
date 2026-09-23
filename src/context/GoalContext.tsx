@@ -38,6 +38,7 @@ export interface GoalState {
   selectConcept: (conceptId: string | null) => void;
   setFocusMode: (conceptId: string | null) => void;
   updateConceptMastery: (conceptId: string, deltaOrAbsolute: number, isAbsolute?: boolean) => void;
+  addXP: (amount: number) => void;
   completeMission: (missionId: string, scorePct: number) => void;
   generateMissionForConcept: (conceptId: string) => Mission;
 }
@@ -289,10 +290,45 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [mastery, setMastery] = useState<number>(72);
   const [speed] = useState<string>('1.2x');
   const [consistency] = useState<number>(92);
-  const [userXP, setUserXP] = useState<number>(3420);
-  const [userLevel] = useState<number>(4);
+  const [userXP, setUserXP] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('nova_user_xp');
+      return saved ? JSON.parse(saved) : 3420;
+    } catch {
+      return 3420;
+    }
+  });
 
-  const [concepts, setConcepts] = useState<ConceptNodeData[]>(INITIAL_CONCEPTS);
+  useEffect(() => {
+    try {
+      localStorage.setItem('nova_user_xp', JSON.stringify(userXP));
+    } catch (e) {
+      console.warn('[GoalContext] Failed saving userXP to localStorage', e);
+    }
+  }, [userXP]);
+
+  const userLevel = Math.max(1, Math.floor(userXP / 800));
+
+  const [concepts, setConcepts] = useState<ConceptNodeData[]>(() => {
+    try {
+      const saved = localStorage.getItem('nova_user_concepts');
+      return saved ? JSON.parse(saved) : INITIAL_CONCEPTS;
+    } catch {
+      return INITIAL_CONCEPTS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('nova_user_concepts', JSON.stringify(concepts));
+    } catch (e) {
+      console.warn('[GoalContext] Failed saving concepts to localStorage', e);
+    }
+  }, [concepts]);
+
+  const addXP = (amount: number) => {
+    setUserXP((prev) => prev + amount);
+  };
   const [edges] = useState<ConceptEdge[]>(INITIAL_EDGES);
   const [selectedConceptId, setSelectedConceptId] = useState<string | null>('hashmap');
   const [focusConceptId, setFocusConceptId] = useState<string | null>(null);
@@ -451,6 +487,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         selectConcept,
         setFocusMode,
         updateConceptMastery,
+        addXP,
         completeMission,
         generateMissionForConcept,
       }}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Flame,
@@ -17,6 +17,7 @@ import {
   AIMindscapeHero,
   MotionMetricsCard,
   InteractiveRadar,
+  HashMapRecoveryModal,
   AnimatedFlameIcon,
   AnimatedPlanetIcon,
   AnimatedGemIcon,
@@ -37,6 +38,7 @@ const itemVariants = {
 };
 
 export const ProfilePage: React.FC = () => {
+  const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState<boolean>(false);
   const {
     targetGoal,
     streak,
@@ -51,6 +53,9 @@ export const ProfilePage: React.FC = () => {
 
   const masteredConcepts = concepts.filter((c) => c.status === 'Mastered');
   const gapConcepts = concepts.filter((c) => c.status === 'Knowledge Gap' || c.status === 'Needs Practice');
+  const hashmapConcept = concepts.find((c) => c.id === 'hashmap');
+  const hashmapMastery = hashmapConcept?.mastery ?? 53;
+  const isHashmapMastered = hashmapConcept?.status === 'Mastered';
 
   return (
     <motion.div
@@ -162,19 +167,38 @@ export const ProfilePage: React.FC = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.4 }}
-                className="p-3.5 bg-white/90 dark:bg-slate-800/90 rounded-2xl border border-rose-100 dark:border-rose-900/50 space-y-1 shadow-sm"
+                className="p-3.5 bg-white/90 dark:bg-slate-800/90 rounded-2xl border border-rose-100 dark:border-rose-900/50 space-y-2 shadow-sm"
               >
-                <div className="flex items-center gap-2 text-xs font-black text-nova-coral">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  <span>Active Knowledge Gap</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                  HashMap collision accuracy (53%) is lower than Arrays (92%). Prioritize the HashMap recovery mission.
-                </p>
-                <div className="pt-1">
-                  <div className="w-full bg-rose-100 dark:bg-rose-950/60 h-2 rounded-full overflow-hidden">
-                    <div className="bg-nova-coral h-full rounded-full" style={{ width: '53%' }} />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black text-nova-coral">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>Active Knowledge Gap</span>
                   </div>
+                  {isHashmapMastered && (
+                    <Badge variant="mint" className="text-[10px] font-bold">
+                      Mastered
+                    </Badge>
+                  )}
+                </div>
+
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  HashMap collision accuracy ({hashmapMastery}%) is lower than Arrays (92%). Prioritize the HashMap recovery mission.
+                </p>
+
+                <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                  <div className="w-full bg-rose-100 dark:bg-rose-950/60 h-2.5 rounded-full overflow-hidden flex-1">
+                    <div
+                      className="bg-gradient-to-r from-nova-coral to-emerald-500 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${hashmapMastery}%` }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => setIsRecoveryModalOpen(true)}
+                    className="px-3 py-1.5 rounded-xl bg-nova-coral hover:bg-nova-coral/90 text-white text-[11px] font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>{isHashmapMastered ? 'Retake Drill' : 'Launch Recovery Mission'}</span>
+                  </button>
                 </div>
               </motion.div>
 
@@ -268,6 +292,12 @@ export const ProfilePage: React.FC = () => {
           })}
         </div>
       </motion.div>
+
+      {/* HashMap Recovery Mission Quiz Modal */}
+      <HashMapRecoveryModal
+        isOpen={isRecoveryModalOpen}
+        onClose={() => setIsRecoveryModalOpen(false)}
+      />
     </motion.div>
   );
 };

@@ -42,12 +42,18 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 space-y-4 rounded-3xl shadow-nova-soft hover:shadow-xl dark:shadow-slate-950/50 transition-all cursor-pointer group"
       >
         {/* Aspect Ratio Thumbnail Container (CLS Prevention) */}
-        <div className="w-full aspect-video rounded-2xl overflow-hidden relative bg-slate-900 border border-gray-100 dark:border-slate-800">
+        {/* Aspect Ratio Thumbnail Container with Fallback Gradient (CLS & Void Prevention) */}
+        <div className="w-full aspect-video rounded-2xl overflow-hidden relative bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 border border-gray-100 dark:border-slate-800 shadow-inner">
           <img
             src={course.thumbnail}
             alt={course.title}
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              // Generative SVG neural mesh fallback image if network drops
+              (e.currentTarget as HTMLImageElement).src =
+                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%230f172a"/><path d="M0,0 L600,340 M600,0 L0,340" stroke="%238b5cf6" stroke-width="2" opacity="0.2"/><circle cx="300" cy="170" r="80" fill="none" stroke="%23f43f5e" stroke-width="3" opacity="0.6"/><circle cx="300" cy="170" r="120" fill="none" stroke="%2310b981" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.5"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-size="20" font-family="sans-serif" font-weight="bold">AI Engineering %26 Architecture</text></svg>';
+            }}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />

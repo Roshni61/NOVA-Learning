@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { getDetailedCourse, type CourseLesson, type CourseModule } from '../../data/courseData';
 import { useCourseProgress } from '../../hooks/useCourseProgress';
+import { useGoal } from '../../context/GoalContext';
 import { Badge, Card, Button } from '../../components/ui';
 
 export const CourseDetailPage: React.FC = () => {
@@ -29,6 +30,7 @@ export const CourseDetailPage: React.FC = () => {
 
   const course = getDetailedCourse(courseId || '');
   const { isLessonCompleted, toggleLessonComplete, getCourseCompletion } = useCourseProgress();
+  const { addXP } = useGoal();
 
   // Active module expansion state (default module 0 open)
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({
@@ -48,6 +50,38 @@ export const CourseDetailPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [courseId]);
+
+  // Body Scroll Lock & Escape Key Listener when Info Modal is active
+  useEffect(() => {
+    if (activeLessonInfoModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveLessonInfoModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeLessonInfoModal]);
+
+  // Idempotency Guard for XP Awarding
+  const handleToggleComplete = (cId: string, lesId: string) => {
+    const wasCompleted = isLessonCompleted(cId, lesId);
+    toggleLessonComplete(cId, lesId);
+
+    // Idempotency Guard: Only award +25 XP if lesson was NOT completed previously!
+    if (!wasCompleted) {
+      addXP(25);
+    }
+  };
 
   if (!course) {
     return (
@@ -204,7 +238,7 @@ export const CourseDetailPage: React.FC = () => {
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <button
-                    onClick={() => toggleLessonComplete(course.id, activeLesson.id)}
+                    onClick={() => handleToggleComplete(course.id, activeLesson.id)}
                     className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
                       isLessonCompleted(course.id, activeLesson.id)
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30'
