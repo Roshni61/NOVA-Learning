@@ -33,6 +33,8 @@ export const App: React.FC = () => {
               {/* Protected App Layout Shell */}
               <Route element={<AppLayout />}>
                 <Route path="/today" element={<TodayPage />} />
+                <Route path="/diagnostic" element={<TodayPage />} />
+
                 <Route path="/catalog" element={<CatalogPage />} />
                 <Route path="/course/:courseId" element={<CourseDetailPage />} />
                 <Route path="/universe" element={<UniversePage />} />

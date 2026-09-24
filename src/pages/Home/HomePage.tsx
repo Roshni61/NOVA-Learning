@@ -3,18 +3,18 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
-  Network,
   BrainCircuit,
-  Target,
   ArrowRight,
   ShieldCheck,
   Zap,
-  Layers,
   TrendingUp,
   Flame,
   Award,
 } from 'lucide-react';
+
 import { Button, Card, Badge } from '../../components/ui';
+import { FourPillarsSection } from '../../components/home/FourPillarsSection';
+
 
 export const HomePage: React.FC = () => {
   return (
@@ -257,91 +257,8 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Feature Grid Section (4 Pillars) */}
-      <section id="features" className="py-20 px-6 max-w-7xl mx-auto w-full border-t border-gray-200/50 dark:border-slate-800">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <Badge variant="lavender">Architected for Continuous Growth</Badge>
-          <h2 className="text-3xl md:text-5xl font-black text-nova-charcoal dark:text-slate-100 tracking-tight">
-            The Four Pillars of NOVA Intelligence
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-base md:text-lg">
-            Re-engineered from the ground up to replace static courses with real-time feedback loops.
-          </p>
-        </div>
+      <FourPillarsSection />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Pillar 1 */}
-          <Card className="bg-white dark:bg-slate-900 p-7 flex flex-col justify-between space-y-6 hover:shadow-2xl border border-gray-100 dark:border-slate-800 rounded-3xl">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-nova-coral/15 flex items-center justify-center text-nova-coral">
-                <Target className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-nova-charcoal dark:text-slate-100">
-                Goal & Diagnostic Engine
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Adaptive baseline assessments pinpoints exact concept gaps instead of starting from scratch.
-              </p>
-            </div>
-            <div className="text-xs font-semibold text-nova-coral flex items-center gap-1">
-              Adaptive Baseline <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Card>
-
-          {/* Pillar 2 */}
-          <Card className="bg-white dark:bg-slate-900 p-7 flex flex-col justify-between space-y-6 hover:shadow-2xl border border-gray-100 dark:border-slate-800 rounded-3xl">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-nova-lavender/25 flex items-center justify-center text-purple-700 dark:text-purple-300">
-                <Network className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-nova-charcoal dark:text-slate-100">
-                Knowledge Universe
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Interactive graph network mapping dependencies, prerequisites, and live mastery states.
-              </p>
-            </div>
-            <div className="text-xs font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1">
-              Prerequisite Mapping <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Card>
-
-          {/* Pillar 3 */}
-          <Card className="bg-white dark:bg-slate-900 p-7 flex flex-col justify-between space-y-6 hover:shadow-2xl border border-gray-100 dark:border-slate-800 rounded-3xl">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-nova-mint/25 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
-                <Layers className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-nova-charcoal dark:text-slate-100">
-                5-Stage Execution Cycle
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Learn → Practice → Apply → Prove → Master cycle ensures deep retention over superficial watching.
-              </p>
-            </div>
-            <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-              Deep Mastery Loop <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Card>
-
-          {/* Pillar 4 */}
-          <Card className="bg-white dark:bg-slate-900 p-7 flex flex-col justify-between space-y-6 hover:shadow-2xl border border-gray-100 dark:border-slate-800 rounded-3xl">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-nova-yellow/40 flex items-center justify-center text-amber-800 dark:text-amber-300">
-                <BrainCircuit className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-nova-charcoal dark:text-slate-100">
-                AI Tutor & Simulator
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Contextual tutor drawer and real-time What-If scenario planner for schedule adjustments.
-              </p>
-            </div>
-            <div className="text-xs font-semibold text-amber-800 dark:text-amber-400 flex items-center gap-1">
-              Interactive Simulator <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Card>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="mt-auto bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-12 px-6">

@@ -22,7 +22,8 @@ import { Button, Card, Badge } from '../../components/ui';
 import { useGoal } from '../../context/GoalContext';
 import { generateMissionQuestions, type GeneratedQuestion } from '../../lib/gemini';
 import { getMissionDetail } from '../../data/missionRegistry';
-import { VideoPlayer, CurriculumDrawer, type CurriculumModule, type LessonItem } from '../../components/lms';
+import { LessonMediaViewer, CurriculumDrawer, type CurriculumModule, type LessonItem } from '../../components/lms';
+
 
 const DEMO_CURRICULUM_MODULES: CurriculumModule[] = [
   {
@@ -276,12 +277,13 @@ export const MissionWorkspacePage: React.FC = () => {
                 <span className="text-xs font-bold text-nova-charcoal dark:text-slate-100">Step {learnStep + 1} of 2</span>
               </div>
 
-              {/* Responsive Video Player Component (aspect-video container) */}
-              <VideoPlayer
+              {/* Responsive Video & Interactive Media Viewer Component */}
+              <LessonMediaViewer
+                lessonId={missionData.id}
                 title={missionData.title}
-                duration={missionData.duration}
                 onEnded={() => setLearnStep(1)}
               />
+
 
               {learnStep === 0 ? (
                 <div className="space-y-6">
