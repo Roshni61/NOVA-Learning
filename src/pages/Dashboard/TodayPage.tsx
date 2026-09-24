@@ -1,5 +1,5 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import React, { useState, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
@@ -32,9 +32,6 @@ interface Mission {
 
 export const TodayPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-
   const {
     targetGoal,
     readiness,
@@ -49,16 +46,6 @@ export const TodayPage: React.FC = () => {
 
   const [isSimulatorOpen, setIsSimulatorOpen] = useState<boolean>(false);
   const [isQuizOpen, setIsQuizOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const action = searchParams.get('action');
-    if (action === 'diagnostic' || location.pathname === '/diagnostic') {
-      setIsQuizOpen(true);
-    } else if (action === 'simulate') {
-      setIsSimulatorOpen(true);
-    }
-  }, [searchParams, location.pathname]);
-
 
   const [missions, setMissions] = useState<Mission[]>(contextMissions);
 
