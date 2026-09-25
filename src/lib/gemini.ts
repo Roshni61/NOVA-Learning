@@ -25,7 +25,16 @@ export interface MissionQuestionContext {
   previousPerformance?: string;
 }
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
+const getApiKey = () => {
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      return import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
+    }
+  } catch {}
+  return (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY) || '';
+};
+
+const apiKey = getApiKey();
 
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
@@ -919,35 +928,124 @@ function getMissionAwareFallbackQuestions(ctx: MissionQuestionContext): Generate
   ];
 }
 
+export interface TutorContextOptions {
+  conceptName?: string;
+  mastery?: number;
+  weakPoints?: string[];
+  targetGoal?: string;
+  tutorMode?: string;
+  history?: { role: 'user' | 'model'; parts: string }[];
+  userXP?: number;
+  userLevel?: number;
+  streak?: number;
+}
+
+/**
+ * Generate topic-specific contextual response if AI API is offline
+ */
+function generateContextualFallback(prompt: string, context?: TutorContextOptions): string {
+  const q = prompt.toLowerCase();
+  const mode = context?.tutorMode || 'teach';
+
+  // Mode specific overrides
+  if (mode === 'interview' || q.includes('interview') || q.includes('system design')) {
+    return `### Machine Learning System Design Interview Question\n\n**Scenario**: Design a real-time recommendation system for an e-commerce platform with 100M daily active users.\n\n**Key Requirements to Address:**\n1. **Candidate Retrieval (Two-Stage Recommendation)**: How will you filter 10M items down to ~500 candidates in < 20ms?\n2. **Feature Store & Real-time Signals**: How do you capture user clicks, cart additions, and sequence embeddings?\n3. **Ranking Model**: What architecture (e.g. Deep & Cross Network, Two-Tower Model) will you use for click-through rate (CTR) prediction?\n4. **Latency vs. Accuracy**: How will you handle model serving SLAs under peak loads?\n\n*How would you structure the Candidate Retrieval stage first?*`;
+  }
+
+  if (mode === 'debug' || q.includes('debug') || q.includes('nullpointer') || q.includes('exception') || q.includes('error')) {
+    return `### Code Debugging & Root Cause Analysis\n\n**Issue Detected**: ${q.includes('null') ? 'NullPointerException' : 'Runtime Code Exception'}\n\n**Root Cause**: Attempting to access member property or length on an uninitialized object reference (\`null\` pointer).\n\n**Corrected Code Approach:**\n\`\`\`java\n// Always check for null before dereferencing or initialize containers\nint[] arr = getArrayData();\nif (arr != null) {\n    System.out.println("Array length: " + arr.length);\n} else {\n    System.out.println("Array is empty or uninitialized.");\n}\n\`\`\`\n\n**Best Practice**: Use defensive null checks or Java 8+ \`Optional<T>\` to prevent unhandled runtime crashes.`;
+  }
+
+  if (mode === 'quiz' || q.includes('quiz')) {
+    const topic = context?.conceptName || 'Machine Learning';
+    return `### Knowledge Check: ${topic}\n\n**Question**: Which technique scales dot-product attention scores in Transformers to prevent vanishing gradients during softmax computation?\n\nA) Dividing by $\\sqrt{d_k}$\nB) Subtracting the mean vector\nC) Applying Batch Normalization\nD) Multiplying by matrix transpose $K^T$\n\n*Reply with your choice (A, B, C, or D) to evaluate your mastery!*`;
+  }
+
+  // Topic specific responses
+  if (q.includes('attention') || q.includes('transformer') || q.includes('q-k-v')) {
+    return `### Scaled Dot-Product Attention Refresher\n\nScaled Dot-Product Attention computes attention weights between Query ($Q$), Key ($K$), and Value ($V$) matrices:\n\n$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V$$\n\n**Key Execution Steps:**\n1. **Similarity Score**: Compute $Q K^T$ to measure token compatibility.\n2. **Scaling Factor**: Divide by $\\sqrt{d_k}$ to prevent extremely large dot products that cause vanishing gradients in softmax.\n3. **Softmax Normalization**: Transform raw scores into a probability distribution summing to 1.\n4. **Weighted Combination**: Multiply by $V$ to produce context-aware representation vectors.`;
+  }
+
+  if (q.includes('hashmap') || q.includes('collision') || q.includes('hash')) {
+    return `### HashMap Collision Handling in Java\n\nA **collision** occurs when two distinct keys hash to the exact same bucket index in a hash table.\n\n**Collision Resolution Strategies:**\n1. **Separate Chaining**: Each bucket contains a linked list. In Java 8+, if a bucket exceeds 8 entries, it dynamically transforms into a Red-Black Tree for $\\mathcal{O}(\\log N)$ worst-case lookup.\n2. **Open Addressing**: Searches for the next available slot via linear or quadratic probing.\n\n\`\`\`java\n// Java HashMap Example\nHashMap<String, Integer> map = new HashMap<>();\nmap.put("Alice", 95);\nmap.put("Bob", 88); // Handled seamlessly via hash bucket indexing\nSystem.out.println("Alice score: " + map.get("Alice"));\n\`\`\``;
+  }
+
+  if (q.includes('binary search') || q.includes('tree') || q.includes('bst')) {
+    return `### Binary Search Mechanics & Complexity\n\nBinary Search operates on sorted arrays by repeatedly splitting the search interval in half.\n\n- **Time Complexity**: $\\mathcal{O}(\\log N)$\n- **Space Complexity**: $\\mathcal{O}(1)$ iterative, $\\mathcal{O}(\\log N)$ recursive\n\n\`\`\`python\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target: return mid\n        elif arr[mid] < target: low = mid + 1\n        else: high = mid - 1\n    return -1\n\`\`\``;
+  }
+
+  if (q.includes('gradient') || q.includes('backprop') || q.includes('loss')) {
+    return `### Backpropagation & Gradient Descent\n\nBackpropagation evaluates error derivatives backward through computational graphs using the calculus **chain rule**.\n\n**Weight Update Formula:**\n$$W_{\\text{new}} = W_{\\text{old}} - \\eta \\cdot \\nabla_W L$$\n\nWhere $\\eta$ represents the learning rate and $\\nabla_W L$ is the partial derivative of loss $L$ with respect to weight $W$.`;
+  }
+
+  return `### NOVA AI Tutor: ${context?.conceptName || 'Learning Concept'}\n\n**Response for**: "${prompt}"\n\n- **Active Concept**: ${context?.conceptName || 'General Practice'}\n- **Current Mastery**: ${context?.mastery || 72}%\n- **Target Goal**: ${context?.targetGoal || 'AI/ML Engineer'}\n\n**Explanation & Action Plan:**\n1. **Core Concept Insight**: ${prompt} is fundamental for mastering modern software engineering and machine learning workflows.\n2. **Practical Focus**: Apply this concept by implementing a small drill or solving a hands-on problem.\n\n*Would you like a quick quiz, code example, or step-by-step breakdown on this?*`;
+}
+
 /**
  * Query Gemini AI for context-aware AI Tutor guidance
  */
 export async function askGeminiTutor(
   prompt: string,
-  context?: { conceptName?: string; mastery?: number; weakPoints?: string[] }
+  context?: TutorContextOptions
 ): Promise<string> {
+  const mode = context?.tutorMode || 'teach';
+  
+  const modeDirectives: Record<string, string> = {
+    teach: 'MODE: TEACH ME. Explain the concept clearly, starting with simple intuitive principles and ending with practical examples. Adapt difficulty based on mastery.',
+    debug: 'MODE: DEBUG MY CODE. Analyze the user code or issue. Identify the exact error, explain WHY it occurs, and show the corrected code.',
+    quiz: 'MODE: QUIZ ME. Generate 1 clear multiple-choice quiz question with options A, B, C, D and test the user understanding.',
+    explain_mistake: 'MODE: EXPLAIN MY MISTAKE. Analyze the user misconception, explain why it is wrong, and provide a corrective example.',
+    analyze: 'MODE: ANALYZE MY PROGRESS. Analyze the user telemetry (mastery, streak, XP) and recommend specific next actions.',
+    path: 'MODE: BUILD MY PATH. Recommend an optimal prerequisite-aware learning sequence based on the target role.',
+    revision: 'MODE: QUICK REVISION. Give a 5-minute concise refresher with key formulas, bullet points, and common pitfalls.',
+    interview: 'MODE: INTERVIEW ME. Act as a senior AI/ML interviewer. Ask ONE realistic technical or system design interview question and wait for response.',
+  };
+
+  const modeInstruction = modeDirectives[mode] || modeDirectives.teach;
+
   if (ai) {
     try {
-      const systemContext = `You are NOVA AI, an intelligent learning assistant embedded in the NOVA Learning OS.
+      const systemContext = `You are NOVA AI, an intelligent learning assistant embedded in NOVA Learning OS.
 User Context:
-- Target Role: AI/ML Engineer
-- Active Concept: ${context?.conceptName || 'General Learning'}
+- Target Role: ${context?.targetGoal || 'AI/ML Engineer'}
+- Active Topic: ${context?.conceptName || 'General Learning'}
 - Current Mastery: ${context?.mastery || 72}%
 - Weak Areas: ${context?.weakPoints?.join(', ') || 'None identified'}
+- User Level: ${context?.userLevel || 4} (${context?.userXP || 1420} XP)
+- Active Streak: ${context?.streak || 12} days
 
-Respond concisely, authoritatively, and with clear formatting (markdown, bullet points, or code snippets when helpful).`;
+Directive: ${modeInstruction}
+
+IMPORTANT: Address the user's EXACT query below directly. Do NOT repeat previous unrelated explanations.
+
+User Question: ${prompt}`;
+
+      let conversationContents: any[] = [{ role: 'user', parts: [{ text: systemContext }] }];
+
+      if (context?.history && context.history.length > 0) {
+        // Append history for multi-turn conversation memory
+        const formattedHistory = context.history.slice(-6).map((h) => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.parts }],
+        }));
+        conversationContents = [...formattedHistory, { role: 'user', parts: [{ text: `[Active Topic: ${context?.conceptName || 'General'}, Mode: ${mode}]\nUser Question: ${prompt}` }] }];
+      }
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `${systemContext}\n\nUser Question: ${prompt}`,
+        contents: conversationContents,
       });
 
-      return response.text || 'I analyzed your question against your learning telemetry. Let me know if you would like me to generate a practice drill or visual diagram for this node!';
+      if (response.text && response.text.trim().length > 0) {
+        return response.text;
+      }
     } catch (err) {
-      console.warn('Gemini Tutor query notice:', err);
+      console.warn('Gemini Tutor query notice (using contextual fallback):', err);
     }
   }
 
-  return `Here is NOVA AI's explanation regarding "${prompt}": In computational graphs, parameter updates rely on directional gradient derivatives. Practicing 15 minutes of matrix calculus will raise your retention by ~12%.`;
+  // Smart contextual fallback when API is unavailable
+  return generateContextualFallback(prompt, context);
 }
+
 

@@ -46,7 +46,7 @@ export const mockCourses: Course[] = [
     lessonsCount: 30,
     rating: 4.88,
     progress: 15,
-    thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=600&auto=format&fit=crop&q=80',
+    thumbnail: '/catalog/ai-engineering-llm.jpg',
     accentColor: 'nova-mint',
   },
 ];

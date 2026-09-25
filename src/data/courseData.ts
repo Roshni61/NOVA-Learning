@@ -332,7 +332,7 @@ export const detailedCourses: Record<string, DetailedCourse> = {
     language: 'English (EN)',
     category: 'Artificial Intelligence',
     defaultVideoId: 'p3sij8QzONQ',
-    thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=80',
+    thumbnail: '/catalog/ai-engineering-llm.jpg',
     accentColor: '#10B981',
     modules: [
       {

@@ -54,10 +54,11 @@ const TUTOR_MODES = [
 
 export const TutorPage: React.FC = () => {
   const location = useLocation();
-  const { concepts, selectedConceptId } = useGoal();
+  const { concepts, selectedConceptId, targetGoal, streak, userXP, userLevel } = useGoal();
 
   const activeConcept = concepts.find((c) => c.id === selectedConceptId) || concepts[0];
 
+  const [selectedModeId, setSelectedModeId] = useState<string>('teach');
   const [input, setInput] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -65,8 +66,8 @@ export const TutorPage: React.FC = () => {
     {
       id: 'm0',
       sender: 'ai',
-      text: `Hello Roshni! I'm NOVA AI, your context-aware learning tutor. Active Context: ${activeConcept.name} (${activeConcept.mastery}% mastery). How can I guide your next move?`,
-      visualType: activeConcept.id === 'hashmap' ? 'hashmap' : 'neuralnet',
+      text: `Hello Learner! I'm NOVA AI, your context-aware learning tutor. Active Context: ${activeConcept.name} (${activeConcept.mastery}% mastery). How can I guide your next move?`,
+      visualType: activeConcept.id === 'hashmap' ? 'hashmap' : undefined,
       timestamp: 'Just now',
     },
   ]);
@@ -77,9 +78,36 @@ export const TutorPage: React.FC = () => {
     }
   }, [location.state]);
 
-  const handleSendMessage = async (textToSend?: string) => {
+  const handleChipClick = (chipLabel: string) => {
+    let customizedPrompt = chipLabel;
+    if (chipLabel === 'Explain this simply') {
+      customizedPrompt = `Explain ${activeConcept.name} simply with an intuitive real-world analogy for a beginner.`;
+    } else if (chipLabel === 'Give me an example') {
+      customizedPrompt = `Give me a concrete code example illustrating ${activeConcept.name}.`;
+    } else if (chipLabel === 'Show me a diagram') {
+      customizedPrompt = `Show me a visual ascii structure and step-by-step diagram for ${activeConcept.name}.`;
+    } else if (chipLabel === 'Quiz me') {
+      customizedPrompt = `Quiz me on ${activeConcept.name} with a multiple-choice question.`;
+    } else if (chipLabel === 'Give me a coding problem') {
+      customizedPrompt = `Give me a hands-on coding challenge related to ${activeConcept.name}.`;
+    } else if (chipLabel === 'Explain step by step') {
+      customizedPrompt = `Explain ${activeConcept.name} step-by-step from first principles.`;
+    } else if (chipLabel === 'Explain differently') {
+      customizedPrompt = `Explain ${activeConcept.name} using a completely different mental model or perspective.`;
+    }
+    handleSendMessage(customizedPrompt);
+  };
+
+  const handleModeClick = (mode: (typeof TUTOR_MODES)[0]) => {
+    setSelectedModeId(mode.id);
+    handleSendMessage(mode.prompt, mode.id);
+  };
+
+  const handleSendMessage = async (textToSend?: string, modeOverride?: string) => {
     const query = textToSend || input;
     if (!query.trim()) return;
+
+    const currentMode = modeOverride || selectedModeId;
 
     const userMsg: TutorMessage = {
       id: Date.now().toString(),
@@ -92,20 +120,40 @@ export const TutorPage: React.FC = () => {
     if (!textToSend) setInput('');
     setIsTyping(true);
 
-    // Call Gemini API / Intelligent AI Service
+    // Format conversation history for memory
+    const history = messages.map((m) => ({
+      role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+      parts: m.text,
+    }));
+
+    // Call Gemini API / Central AI Tutor Service
     const aiResponseText = await askGeminiTutor(query, {
       conceptName: activeConcept.name,
       mastery: activeConcept.mastery,
       weakPoints: activeConcept.weakPoints,
+      targetGoal,
+      tutorMode: currentMode,
+      history,
+      userXP,
+      userLevel,
+      streak,
     });
 
+    const qLower = query.toLowerCase();
     let visual: TutorMessage['visualType'] = undefined;
-    if (query.toLowerCase().includes('diagram') || query.toLowerCase().includes('hashmap') || query.toLowerCase().includes('teach')) {
+
+    if (qLower.includes('hashmap') || qLower.includes('hash table') || qLower.includes('collision')) {
       visual = 'hashmap';
-    } else if (query.toLowerCase().includes('neural') || query.toLowerCase().includes('backprop')) {
+    } else if (qLower.includes('neural') || qLower.includes('backprop') || qLower.includes('gradient') || qLower.includes('loss')) {
       visual = 'neuralnet';
-    } else if (query.toLowerCase().includes('tree')) {
+    } else if (qLower.includes('tree') || qLower.includes('binary search') || qLower.includes('bst')) {
       visual = 'tree';
+    } else if (qLower.includes('graph') || qLower.includes('universe')) {
+      visual = 'graph';
+    } else if (qLower.includes('stack') || qLower.includes('queue')) {
+      visual = 'stack';
+    } else if (qLower.includes('linkedlist') || qLower.includes('linked list')) {
+      visual = 'linkedlist';
     }
 
     const aiMsg: TutorMessage = {
@@ -193,13 +241,16 @@ export const TutorPage: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {TUTOR_MODES.map((mode) => {
             const Icon = mode.icon;
+            const isSelected = selectedModeId === mode.id;
             return (
               <motion.div
                 key={mode.id}
                 whileHover={{ y: -3, scale: 1.02, boxShadow: '0 8px 20px -4px rgba(167, 139, 250, 0.2)' }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => handleSendMessage(mode.prompt)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between space-y-3 ${mode.color}`}
+                onClick={() => handleModeClick(mode)}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between space-y-3 ${
+                  isSelected ? 'ring-2 ring-nova-coral shadow-md ' + mode.color : mode.color
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-xl bg-white/90 shadow-sm flex items-center justify-center font-bold">
@@ -301,8 +352,8 @@ export const TutorPage: React.FC = () => {
           {PROMPT_CHIPS.map((chip) => (
             <button
               key={chip}
-              onClick={() => handleSendMessage(chip)}
-              className="px-3 py-1.5 rounded-xl bg-nova-bg hover:bg-purple-100 text-xs font-semibold text-nova-charcoal border border-gray-200 whitespace-nowrap transition-all"
+              onClick={() => handleChipClick(chip)}
+              className="px-3 py-1.5 rounded-xl bg-nova-bg hover:bg-purple-100 text-xs font-semibold text-nova-charcoal border border-gray-200 whitespace-nowrap transition-all cursor-pointer"
             >
               {chip}
             </button>
