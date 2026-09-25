@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
@@ -12,9 +12,11 @@ import {
   Sun,
   Moon,
   BookOpen,
+  LogOut,
 } from 'lucide-react';
 import { Badge } from '../ui';
 import { useGoal } from '../../context/GoalContext';
+import { useAuth } from '../../context/AuthContext';
 import { mockUser } from '../../mock/data';
 import { CommandPalette } from '../common/CommandPalette';
 
@@ -29,8 +31,15 @@ const NAV_ITEMS = [
 
 export const AppLayout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { targetGoal, theme, toggleTheme, userXP, userLevel } = useGoal();
+  const { user, logout } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   // Global Keyboard Shortcut: Cmd/Ctrl + K with Chromium e.preventDefault()
   useEffect(() => {
@@ -153,13 +162,23 @@ export const AppLayout: React.FC = () => {
             </div>
 
             <img
-              src={mockUser.avatarUrl}
-              alt={`Avatar of ${mockUser.name}`}
+              src={user?.avatarUrl || mockUser.avatarUrl}
+              alt={`Avatar of ${user?.name || mockUser.name}`}
               loading="lazy"
               decoding="async"
               className="w-7 h-7 rounded-full object-cover border border-gray-300 dark:border-slate-600"
             />
           </Link>
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleLogout}
+            aria-label="Sign out of your account"
+            title="Sign Out"
+            className="w-11 h-11 rounded-2xl bg-nova-bg dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950/50 border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center transition-all hover:scale-105 min-h-[44px] min-w-[44px] cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </header>
 

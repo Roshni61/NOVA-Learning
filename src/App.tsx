@@ -1,8 +1,11 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { GoalProvider } from './context/GoalContext';
 import { AppLayout } from './components/layout';
 import { PageSkeleton, ErrorBoundary } from './components/ui';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute';
 
 // Lazy-loaded page route components for dynamic code splitting
 const HomePage = lazy(() => import('./pages/Home/HomePage').then((m) => ({ default: m.HomePage })));
@@ -21,34 +24,70 @@ const NotFoundPage = lazy(() => import('./pages/NotFound/NotFoundPage').then((m)
 export const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <GoalProvider>
-        <BrowserRouter>
-          <Suspense fallback={<PageSkeleton />}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
+      <AuthProvider>
+        <GoalProvider>
+          <BrowserRouter>
+            <Suspense fallback={<PageSkeleton />}>
+              <Routes>
+                {/* Public Only Routes (Redirect to /today if already authenticated) */}
+                <Route
+                  path="/login"
+                  element={
+                    <PublicOnlyRoute>
+                      <LoginPage initialMode="login" />
+                    </PublicOnlyRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicOnlyRoute>
+                      <LoginPage initialMode="signup" />
+                    </PublicOnlyRoute>
+                  }
+                />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/landing" element={<HomePage />} />
 
-              {/* Protected App Layout Shell */}
-              <Route element={<AppLayout />}>
-                <Route path="/today" element={<TodayPage />} />
-                <Route path="/catalog" element={<CatalogPage />} />
-                <Route path="/course/:courseId" element={<CourseDetailPage />} />
-                <Route path="/universe" element={<UniversePage />} />
-                <Route path="/path" element={<PathPage />} />
-                <Route path="/tutor" element={<TutorPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/mission/:conceptId" element={<MissionWorkspacePage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Route>
+                {/* Protected Routes Guard Shell */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppLayout />}>
+                    {/* Authenticated Home / Dashboard Routes */}
+                    <Route path="/" element={<TodayPage />} />
+                    <Route path="/today" element={<TodayPage />} />
+                    <Route path="/home" element={<TodayPage />} />
+                    <Route path="/dashboard" element={<TodayPage />} />
 
-              {/* Fallback Catch-all Route */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </GoalProvider>
+                    {/* Catalog & Learning Routes */}
+                    <Route path="/catalog" element={<CatalogPage />} />
+                    <Route path="/course/:courseId" element={<CourseDetailPage />} />
+                    <Route path="/learn" element={<CatalogPage />} />
+                    <Route path="/practice" element={<PathPage />} />
+
+                    {/* Universe, Path, Tutor & Profile Routes */}
+                    <Route path="/universe" element={<UniversePage />} />
+                    <Route path="/path" element={<PathPage />} />
+                    <Route path="/tutor" element={<TutorPage />} />
+                    <Route path="/ai-tutor" element={<TutorPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/progress" element={<ProfilePage />} />
+                    <Route path="/analytics" element={<ProfilePage />} />
+
+                    {/* Daily Mission Workspace */}
+                    <Route path="/mission/:conceptId" element={<MissionWorkspacePage />} />
+
+                    {/* Protected Fallback */}
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Route>
+                </Route>
+
+                {/* Unauthenticated Catch-all Fallback -> Redirects to /login */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </GoalProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 };
