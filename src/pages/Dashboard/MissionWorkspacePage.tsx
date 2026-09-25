@@ -71,6 +71,8 @@ export const MissionWorkspacePage: React.FC = () => {
   const [testOutput, setTestOutput] = useState<string | null>(null);
   const [isTestPassed, setIsTestPassed] = useState<boolean | null>(null);
 
+  const { selectConcept } = useGoal();
+
   // Stage Completion Locks
   const [isPracticeUnlocked, setIsPracticeUnlocked] = useState<boolean>(false);
   const [isApplyUnlocked, setIsApplyUnlocked] = useState<boolean>(false);
@@ -78,6 +80,9 @@ export const MissionWorkspacePage: React.FC = () => {
 
   // Synchronize state when route conceptId changes
   useEffect(() => {
+    if (missionData.conceptId) {
+      selectConcept(missionData.conceptId);
+    }
     setUserCode(missionData.applyContent.initialCode);
     setTestOutput(null);
     setIsTestPassed(null);
@@ -91,7 +96,7 @@ export const MissionWorkspacePage: React.FC = () => {
     setIsPracticeUnlocked(false);
     setIsApplyUnlocked(false);
     setIsProveUnlocked(false);
-  }, [conceptId, missionData.id]);
+  }, [conceptId, missionData.id, missionData.conceptId, selectConcept]);
 
   // Load API questions dynamically
   useEffect(() => {
@@ -238,16 +243,14 @@ export const MissionWorkspacePage: React.FC = () => {
                 key={stage}
                 disabled={!isUnlocked}
                 onClick={() => setActiveStage(stage)}
-                aria-label={`Switch to ${stage} stage (${
-                  stage === 'Learn' ? '25%' : stage === 'Practice' ? '50%' : stage === 'Apply' ? '75%' : '100%'
-                } progress). ${isUnlocked ? 'Unlocked' : 'Locked'}`}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap min-h-[44px] ${
-                  activeStage === stage
+                aria-label={`Switch to ${stage} stage (${stage === 'Learn' ? '25%' : stage === 'Practice' ? '50%' : stage === 'Apply' ? '75%' : '100%'
+                  } progress). ${isUnlocked ? 'Unlocked' : 'Locked'}`}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap min-h-[44px] ${activeStage === stage
                     ? 'bg-nova-charcoal dark:bg-slate-100 text-white dark:text-nova-charcoal shadow-md'
                     : isUnlocked
-                    ? 'bg-nova-bg dark:bg-slate-800 text-nova-charcoal dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer'
-                    : 'bg-gray-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
-                }`}
+                      ? 'bg-nova-bg dark:bg-slate-800 text-nova-charcoal dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer'
+                      : 'bg-gray-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
+                  }`}
               >
                 {!isUnlocked && <Lock className="w-3 h-3" />}
                 {stage === 'Learn' && '1. Learn (25%)'}
@@ -278,6 +281,7 @@ export const MissionWorkspacePage: React.FC = () => {
 
               {/* Responsive Video Player Component (aspect-video container) */}
               <VideoPlayer
+                lessonId={missionData.id}
                 title={missionData.title}
                 duration={missionData.duration}
                 onEnded={() => setLearnStep(1)}
@@ -463,11 +467,10 @@ export const MissionWorkspacePage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1 ${
-                        selectedOption === currentQ.correctAnswer
+                      className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1 ${selectedOption === currentQ.correctAnswer
                           ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200'
                           : 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-950 dark:text-rose-200'
-                      }`}
+                        }`}
                     >
                       <div className="font-bold flex items-center gap-1.5">
                         {selectedOption === currentQ.correctAnswer ? '✓ Correct Answer!' : '✗ Explanation:'}
