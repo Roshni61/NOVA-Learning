@@ -29,7 +29,11 @@ export const App: React.FC = () => {
           <BrowserRouter>
             <Suspense fallback={<PageSkeleton />}>
               <Routes>
-                {/* Public Only Routes (Redirect to /today if already authenticated) */}
+                {/* Public Landing Page */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/landing" element={<HomePage />} />
+
+                {/* Public Authentication Routes */}
                 <Route
                   path="/login"
                   element={
@@ -46,14 +50,20 @@ export const App: React.FC = () => {
                     </PublicOnlyRoute>
                   }
                 />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <PublicOnlyRoute>
+                      <LoginPage initialMode="login" />
+                    </PublicOnlyRoute>
+                  }
+                />
                 <Route path="/onboarding" element={<OnboardingPage />} />
-                <Route path="/landing" element={<HomePage />} />
 
-                {/* Protected Routes Guard Shell */}
+                {/* Protected Routes (Require Authentication) */}
                 <Route element={<ProtectedRoute />}>
                   <Route element={<AppLayout />}>
                     {/* Authenticated Home / Dashboard Routes */}
-                    <Route path="/" element={<TodayPage />} />
                     <Route path="/today" element={<TodayPage />} />
                     <Route path="/home" element={<TodayPage />} />
                     <Route path="/dashboard" element={<TodayPage />} />

@@ -110,7 +110,7 @@ export const HomePage: React.FC = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-              <Link to="/onboarding">
+              <Link to="/login">
                 <motion.button
                   whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(255, 107, 107, 0.4)' }}
                   whileTap={{ scale: 0.97 }}
